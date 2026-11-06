@@ -1,22 +1,30 @@
 /*
    Poptropica island sweep — run from the browser console.
 
-   Open the game page first (local or deployed), then either paste this whole file
-   into devtools, or from the same origin run:
+   Open a game page (local or deployed), then paste this file into devtools, or from
+   the same origin run:
        fetch('tools/pop-sweep.js').then(r => r.text()).then(eval)
 
-   It loads each island in an offscreen iframe, one at a time, and waits until that
-   frame actually requests its scene SWF. Keep the tab visible and in front: browsers
-   throttle timers in background tabs and the run will crawl.
+   Each island boots a whole Ruffle instance, so the sweep no longer tries all 38 at
+   once: it checks CHUNK islands per run, saves the ones that finished, and asks you
+   to run the same command again. That bounds memory, and a crash costs one chunk
+   instead of the whole run.
+
+   Run the command once per chunk until it prints the full summary. To start over:
+       window.__popSweepReset = true
+   To boot more islands per run (default 8):
+       window.__popSweepChunk = 15
+   To check just a few islands, without touching saved progress:
+       window.__popSweepOnly = ["Tribal","Vampire","Villain","West"]
 
    The entry room comes from the client's own table (framework/data/config.xml). Most
-   islands enter at "<Island>Main", but Early starts in City2, Shark in Mainstreet,
-   Time in Present, Haunted in Haunted1 and LegendarySwords in Landing; Demo is not in
-   the table at all and starts in LandPrototypeAS2. Asking those six for
-   "scene<Island>Main.swf" is a 404 that says nothing about the island.
+   islands enter at "<Island>Main"; Early starts in City2, Shark in Mainstreet, Time
+   in Present, Haunted in Haunted1, LegendarySwords in Landing, and Demo (absent from
+   the table) in LandPrototypeAS2. Asking those six for "scene<Island>Main.swf" is a
+   404 that says nothing about the island.
 
-   A row that hits its deadline without asking for any scene is retried once, and its
-   last few requests are printed: a throttled iframe looks exactly like a stall.
+   Keep the tab focused: browsers throttle background tabs and a throttled iframe
+   looks exactly like a stall.
 
    At the end: a console table, plus window.__sweepResult (JSON, already copied to
    the clipboard if the page allows it).
@@ -39,15 +47,40 @@
     Demo: "LandPrototypeAS2"
   };
 
+  const CHUNK = 8;                    // islands per run; override with window.__popSweepChunk
   const PER_ISLAND_TIMEOUT = 30000;   // give up waiting for a scene after this
   const RETRY_TIMEOUT = 35000;        // one clean retry for a row that saw no scene
   const POLL = 250;                   // how often to look inside the frame
-  const GAP = 500;                    // pause between islands
+  const TEARDOWN = 200;               // let the player unload before the frame goes
+  const GAP = 800;                    // and a breath between islands
 
-  const base = location.pathname.replace(/[^/]*$/, "");   // the game folder, with trailing slash
+  const base = location.pathname.replace(/[^/]*$/, "");   // game folder, with trailing slash
+  const KEY = "pop-sweep:" + base;
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const rows = [];
   const startedAt = performance.now();
+
+  const only = Array.isArray(window.__popSweepOnly) ? window.__popSweepOnly.slice() : null;
+  if (window.__popSweepReset) {
+    window.__popSweepReset = false;
+    try { localStorage.removeItem(KEY); } catch (err) {}
+  }
+
+  let progress = { rows: [] };
+  if (!only) {
+    try {
+      const saved = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (saved && Array.isArray(saved.rows)) progress = saved;
+    } catch (err) {}
+  }
+
+  // A bigger chunk means fewer runs but a heavier tab. Every finished island is saved
+  // immediately, so even a crash costs only the island in flight, not the chunk.
+  const chunk = Math.min(Math.max(parseInt(window.__popSweepChunk, 10) || CHUNK, 1), ISLANDS.length);
+  const done = new Set(progress.rows.map(r => r.island));
+  const queue = only
+    ? ISLANDS.filter(n => only.indexOf(n) !== -1)
+    : ISLANDS.filter(n => !done.has(n)).slice(0, chunk);
 
   const tagText = (el, tag) => {
     const node = el.getElementsByTagName(tag)[0];
@@ -79,7 +112,9 @@
 
   async function probe(name, room, timeoutMs) {
     const frame = document.createElement("iframe");
-    frame.style.cssText = "width:480px;height:360px;position:fixed;left:-9999px;top:0;border:0";
+    frame.width = "320";
+    frame.height = "240";
+    frame.style.cssText = "width:320px;height:240px;position:fixed;left:-9999px;top:0;border:0";
     document.body.appendChild(frame);
 
     const t0 = performance.now();
@@ -118,6 +153,16 @@
       }
     }
 
+    // The frame owns a WASM player and a WebGL surface. Destroy the player and blank
+    // the document before dropping the frame; otherwise they accumulate run after run
+    // until the tab dies - which is exactly what an unbounded 38-island sweep did.
+    try {
+      const w = frame.contentWindow;
+      const player = w && w.RufflePlayer && w.RufflePlayer.newest && w.RufflePlayer.newest();
+      if (player && typeof player.destroy === "function") player.destroy();
+    } catch (err) {}
+    try { frame.src = "about:blank"; } catch (err) {}
+    await sleep(TEARDOWN);
     frame.remove();
     await sleep(GAP);
 
@@ -126,10 +171,14 @@
 
   const rooms = await entryRooms();
 
-  console.log("%cpop-sweep: " + ISLANDS.length + " islands from " + base, "font-weight:bold");
-  console.log("keep this tab focused until it finishes");
+  if (only && !queue.length) {
+    console.warn("pop-sweep: none of " + only.join(", ") + " are known islands");
+  } else if (queue.length) {
+    console.log("%cpop-sweep: " + queue.length + " island(s) from " + base + " · chunk " + chunk, "font-weight:bold");
+    console.log("keep this tab focused until this chunk finishes");
+  }
 
-  for (const name of ISLANDS) {
+  for (const name of queue) {
     const room = rooms[name] || "";
     let r = await probe(name, room, PER_ISLAND_TIMEOUT);
     let retried = false;
@@ -139,6 +188,7 @@
     if (r.scene === "NONE" && !r.failed.length) {
       retried = true;
 
+      console.log("  " + name + ": no scene after " + (PER_ISLAND_TIMEOUT / 1000) + "s, retrying once");
       const again = await probe(name, room, RETRY_TIMEOUT);
       r = { scene: again.scene, failed: again.failed, reqs: again.reqs, recent: again.recent, ms: r.ms + again.ms };
     }
@@ -149,7 +199,7 @@
       ms: r.ms,
       scene: r.scene,
       // Keep the array, not a display string: the summary counts failures with
-      // failed.length, and "-" has a length of 1 (that bug reported ok:0 once).
+      // failed.length, and "-" has a length of 1.
       failed: r.failed,
       reqs: r.reqs,
       recent: r.recent
@@ -157,8 +207,13 @@
     if (retried) row.retried = true;
     rows.push(row);
 
+    if (!only) {
+      progress.rows.push(row);
+      try { localStorage.setItem(KEY, JSON.stringify(progress)); } catch (err) {}
+    }
+
     console.log(
-      String(rows.length).padStart(2) + "/" + ISLANDS.length + "  " +
+      String(rows.length).padStart(2) + "/" + queue.length + "  " +
       name.padEnd(16) + String(row.ms).padStart(6) + "ms  " +
       row.scene.padEnd(34) +
       (room ? "room:" + room + "  " : "") +
@@ -170,15 +225,29 @@
       console.log("      stalled after: " + row.recent.join(", "));
   }
 
+  const allRows = only
+    ? rows
+    : ISLANDS.map(n => progress.rows.find(r => r.island === n)).filter(Boolean);
+  const remaining = ISLANDS.filter(n => !allRows.some(r => r.island === n));
+
+  if (!only && remaining.length) {
+    console.log("%cchunk done · " + allRows.length + "/" + ISLANDS.length + " islands checked",
+                "font-weight:bold");
+    console.log("left: " + remaining.join(", "));
+    console.log("run the same command again to continue; progress is saved in this browser");
+    console.log("to start over: window.__popSweepReset = true");
+    return;
+  }
+
   const secs = ((performance.now() - startedAt) / 1000).toFixed(1);
   const summary = {
     finishedAt: new Date().toISOString(),
     tookSeconds: Number(secs),
-    ok: rows.filter(r => !r.failed.length && r.scene !== "NONE").length,
-    failed: rows.filter(r => r.failed.length).map(r => r.island),
-    noScene: rows.filter(r => !r.failed.length && r.scene === "NONE").map(r => r.island),
-    retried: rows.filter(r => r.retried).map(r => r.island),
-    rows: rows
+    ok: allRows.filter(r => !r.failed.length && r.scene !== "NONE").length,
+    failed: allRows.filter(r => r.failed.length).map(r => r.island),
+    noScene: allRows.filter(r => !r.failed.length && r.scene === "NONE").map(r => r.island),
+    retried: allRows.filter(r => r.retried).map(r => r.island),
+    rows: allRows
   };
 
   window.__sweepResult = summary;
@@ -186,12 +255,16 @@
   console.log("%c=== done in " + secs + "s · ok " + summary.ok + " · failed " +
               summary.failed.length + " · no scene " + summary.noScene.length + " ===",
               "font-weight:bold");
-  if (console.table) console.table(rows);
+  if (console.table) console.table(allRows);
 
   const text = JSON.stringify(summary);
   console.log("---- copy this line and paste it back ----");
   console.log(text);
   try { await navigator.clipboard.writeText(text); console.log("(also copied to your clipboard)"); } catch (err) {}
+
+  if (!only) {
+    try { localStorage.removeItem(KEY); } catch (err) {}
+  }
 
   return summary;
 })();
