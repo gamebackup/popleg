@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<framework_config>
+	
+	<islands>
+		<island>
+			<name>Home</name>
+			<islandMain>Home</islandMain>
+			<clusterName>Home Island</clusterName>
+			<medallion></medallion>
+			<init_coords></init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Early</name>
+			<islandMain>City2</islandMain>
+			<clusterName>Early Poptropica Island</clusterName>
+			<medallion>1001</medallion>
+			<init_coords>897,560</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Haunted</name>
+			<islandMain>Haunted1</islandMain>
+			<clusterName>Haunted House Quest</clusterName>
+			<medallion></medallion>
+			<init_coords>2437, 1226</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Party</name>
+			<islandMain></islandMain>
+			<clusterName>Multiverse</clusterName>
+			<medallion></medallion>
+			<init_coords></init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Trade</name>
+			<islandMain>TradeMain</islandMain>
+			<clusterName>Skullduggery Island</clusterName>
+			<medallion>1013</medallion>
+			<init_coords>1685,830</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Myth</name>
+			<islandMain>MythMain</islandMain>
+			<clusterName>Mythology Island</clusterName>
+			<medallion>1012</medallion>
+			<init_coords>1315, 420</init_coords>
+			<mobile>true</mobile>
+		</island>
+		<island>
+			<name>Reality</name>
+			<islandMain>RealityMain</islandMain>
+			<clusterName>Reality TV Island</clusterName>
+			<medallion>1011</medallion>
+			<init_coords>3311,330</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Counter</name>
+			<islandMain>CounterMain</islandMain>
+			<clusterName>Counterfeit Island</clusterName>
+			<medallion>1010</medallion>
+			<init_coords>2536,990</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Astro</name>
+			<islandMain>AstroMain</islandMain>
+			<clusterName>Astro-Knights Island</clusterName>
+			<medallion>1009</medallion>
+			<init_coords>355,534</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>BigNate</name>
+			<islandMain>BigNateMain</islandMain>
+			<clusterName>Big Nate Island</clusterName>
+			<medallion>1008</medallion>
+			<init_coords>480,560</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Nabooti</name>
+			<islandMain>NabootiMain</islandMain>
+			<clusterName>Nabooti Island</clusterName>
+			<medallion>1007</medallion>
+			<init_coords>3586,460</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Spy</name>
+			<islandMain>SpyMain</islandMain>
+			<clusterName>Spy Island</clusterName>
+			<medallion>1006</medallion>
+			<init_coords>1270,1600</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Super</name>
+			<islandMain>SuperMain</islandMain>
+			<clusterName>Super Power Island</clusterName>
+			<medallion>1005</medallion>
+			<init_coords>2440,1270</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Carrot</name>
+			<islandMain>CarrotMain</islandMain>
+			<clusterName>24 Carrot Island</clusterName>
+			<medallion>1004</medallion>
+			<init_coords>643,250</init_coords>
+			<mobile>true</mobile>
+		</island>
+		<island>
+			<name>Time</name>
+			<islandMain>Present</islandMain>
+			<clusterName>Time Tangled Island</clusterName>
+			<medallion>1003</medallion>
+			<init_coords>972,2040</init_coords>
+			<mobile>true</mobile>
+		</island>
+		<island>
+			<name>Shark</name>
+			<islandMain>Mainstreet</islandMain>
+			<clusterName>Shark Tooth Island</clusterName>
+			<medallion>1002</medallion>
+			<init_coords>552,495</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Steam</name>
+			<islandMain>SteamMain</islandMain>
+			<clusterName>Steamworks Island</clusterName>
+			<medallion>1014</medallion>
+			<init_coords>329,1500</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Peanuts</name>
+			<islandMain>PeanutsMain</islandMain>
+			<clusterName>Great Pumpkin Island</clusterName>
+			<medallion>1015</medallion>
+			<init_coords>1136,110</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Cryptid</name>
+			<islandMain>CryptidMain</islandMain>
+			<clusterName>Cryptids Island</clusterName>
+			<medallion>1016</medallion>
+			<init_coords>1620,300</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>West</name>
+			<islandMain>WestMain</islandMain>
+			<clusterName>Wild West Island</clusterName>
+			<medallion>1017</medallion>
+			<init_coords>200,600</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Wimpy</name>
+			<islandMain>WimpyMain</islandMain>
+			<clusterName>Wimpy Wonderland Island</clusterName>
+			<medallion>1018</medallion>
+			<init_coords>2460,410</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Japan</name>
+			<islandMain>JapanMain</islandMain>
+			<clusterName>Red Dragon Island</clusterName>
+			<medallion>1019</medallion>
+			<init_coords>2273,690</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Shrink</name>
+			<islandMain>ShrinkMain</islandMain>
+			<clusterName>Shrink Ray Island</clusterName>
+			<medallion>1020</medallion>
+			<init_coords>1810,530</init_coords>
+			<mobile>true</mobile>
+		</island>
+		<island>
+			<name>Train</name>
+			<islandMain>TrainMain</islandMain>
+			<clusterName>Mystery Train Island</clusterName>
+			<medallion>1021</medallion>
+			<init_coords>4690,870</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>GameShow</name>
+			<islandMain>GameShowMain</islandMain>
+			<clusterName>Game Show Island</clusterName>
+			<medallion>1022</medallion>
+			<init_coords>3786,750</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>LegendarySwords</name>
+			<islandMain>Landing</islandMain>
+			<clusterName>Legendary Swords Island</clusterName>
+			<medallion>1059</medallion>
+			<init_coords>728,2219</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Ghost</name>
+			<islandMain>GhostMain</islandMain>
+			<clusterName>Ghost Story Island</clusterName>
+			<medallion>1023</medallion>
+			<init_coords>1775,720</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Shipwreck</name>
+			<islandMain>ShipwreckMain</islandMain>
+			<clusterName>S.O.S. Island</clusterName>
+			<medallion>1024</medallion>
+			<init_coords>5050,1700</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Vampire</name>
+			<islandMain>VampireMain</islandMain>
+			<clusterName>Vampire's Curse Island</clusterName>
+			<medallion>1025</medallion>
+			<init_coords>1025,490</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Woodland</name>
+			<islandMain>WoodlandMain</islandMain>
+			<clusterName>Twisted Thicket</clusterName>
+			<medallion>1026</medallion>
+			<init_coords>356,1027</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Tribal</name>
+			<islandMain>TribalMain</islandMain>
+			<clusterName>Poptropolis Games</clusterName>
+			<medallion>1027</medallion>
+			<init_coords>255,950</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Boardwalk</name>
+			<islandMain>BoardwalkMain</islandMain>
+			<clusterName>Wimpy Boardwalk</clusterName>
+			<medallion>1028</medallion>
+			<init_coords>360,420</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Moon</name>
+			<islandMain>MoonMain</islandMain>
+			<clusterName>Lunar Colony</clusterName>
+			<medallion>1029</medallion>
+			<init_coords>1330,900</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Villain</name>
+			<islandMain>VillainMain</islandMain>
+			<clusterName>Super Villain Island</clusterName>
+			<medallion>1030</medallion>
+			<init_coords>2584,1465</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Charlie</name>
+			<islandMain>CharlieMain</islandMain>
+			<clusterName>Charlie and the Chocolate Factory</clusterName>
+			<medallion>1031</medallion>
+			<init_coords>2162,1326</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Zombie</name>
+			<islandMain>ZombieMain</islandMain>
+			<clusterName>Zomberry Island</clusterName>
+			<medallion>1032</medallion>
+			<init_coords>2182,680</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>NightWatch</name>
+			<islandMain>NightWatchMain</islandMain>
+			<clusterName>Night Watch Island</clusterName>
+			<medallion>1033</medallion>
+			<init_coords>150,660</init_coords>
+			<mobile>false</mobile>
+		</island>
+		<island>
+			<name>Backlot</name>
+			<islandMain>BacklotMain</islandMain>
+			<clusterName>Back Lot Island</clusterName>
+			<medallion>1034</medallion>
+			<init_coords>3030,575</init_coords>
+			<mobile>false</mobile>
+		</island>
+	</islands>
+	
+</framework_config>

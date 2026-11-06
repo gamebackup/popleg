@@ -1,0 +1,843 @@
+<Clues>
+
+<Clue id="1" name="DeviceStolen" displayName="motion capture device stolen" graphic="device">
+
+    <Response npc="Tesla">
+        <SayText type="npc">What do I care of Edison's misfortune? I'm working!*stomp* Don't bother me again.</SayText>
+    </Response>
+
+    <Response npc="Anthony">
+        <SayText type="npc">Nikola Tesla has been |locked in his cabin| since the theft. That seems suspicious to me.</SayText>
+        <Action type="addClue" data="2" />
+    </Response>
+
+    <Response npc="NyTimes">
+        <SayText type="npc">I saw Mark Twain hiding something in a |secret compartment| in his cabin! Maybe it was Edison's device!</SayText>
+        <Action type="addClue" data="3"/>
+    </Response>
+
+    <Response npc="Edison">
+        <SayText type="npc">That device was going to make me the star of the fair.*cry* You've got to find it!</SayText>
+    </Response>
+
+    <Response npc="LeMonde">
+        <SayText type="npc">Whoever stole it couldn't have gotten off the train, which means the device is still onboard. Find the device, and you'll find the thief!</SayText>
+    </Response>
+
+    <Response npc="CoalMan">
+        <SayText type="npc">I've been in the engine room this whole time. and I've got the coal marks to prove it!</SayText>
+    </Response>
+
+    <Response npc="Weisz">
+        <SayText type="npc">Astonishing that something could vanish into thin air like that. What a trick!</SayText>
+    </Response>
+
+    <Response npc="Eiffel">
+        <SayText type="npc">Quelle disappointment!*grief* I was looking forward to seeing Monsieur Edison's device in action!</SayText>
+    </Response>
+
+    <Response npc="Ferris">
+        <SayText type="npc">I'm sorry to hear about Mr. Edison's troubles, but I've got problems of my own.</SayText>
+    </Response>
+
+    <Response npc="Porter">
+        <SayText type="npc">This is going to reflect very poorly on the railroad company!</SayText>
+    </Response>
+
+    <Response npc="Twain">
+        <SayText type="npc">Suspicious folks all around, but none moreso than whoever is riding in the last car. That fella's behind more security than my memoirs!</SayText>
+    </Response>
+
+    <Response npc="player">
+        <SayText type="thought">The missing motion capture device... I should ask everybody on the train about it and see what they know.</SayText>
+    </Response>
+
+    <Response npc="default">
+        <SayText type="npc"></SayText>
+    </Response>
+
+</Clue>
+
+<Clue id="2" name="TeslaCabin" displayName="Nikola Tesla hiding in cabin" graphic="tesla">
+
+    <Response npc="Anthony">
+        <SayText type="npc">Nikola Tesla has been locked in his cabin since the theft. That seems suspicious to me.</SayText>
+    </Response>
+
+    <Response npc="NyTimes">
+        <SayText type="npc">I didn't notice anything unusual, but I'll keep trying to remember anything suspicious.</SayText>
+    </Response>
+
+    <Response npc="Edison">
+        <SayText type="npc">It's like Tesla to retreat from the world. What an odd duck.</SayText>
+    </Response>
+
+    <Response npc="LeMonde">
+        <SayText type="npc">Monsieur Tesla didn't even glance at me when I passed him earlier. What an unfriendly person.</SayText>
+    </Response>
+
+    <Response npc="CoalMan">
+        <SayText type="npc">Don't know anything about him. I just shovel coal.</SayText>
+    </Response>
+
+    <Response npc="Weisz">
+        <SayText type="npc">Disappearing isn't such a difficult trick.</SayText>
+    </Response>
+
+    <Response npc="Eiffel">
+        <SayText type="npc">I did hear a cabin door open and close when we went through the tunnel. It could have been Tesla's.</SayText>
+    </Response>
+
+    <Response npc="Ferris">
+        <SayText type="npc">I can't get Tesla to talk to me either. But I have so much to talk to him about!</SayText>
+    </Response>
+
+    <Response npc="Porter">
+        <SayText type="npc">Don't bother Mr. Tesla. Our cabin doors have locks for a reason.</SayText>
+    </Response>
+
+    <Response npc="Twain">
+        <SayText type="npc">Sometimes a man just wants some peace and quiet. Nothing wrong with that.</SayText>
+    </Response>
+
+    <Response npc="player">
+        <SayText type="thought">Susan B. Anthony said that Tesla is hiding in his room. I should find a way in there.</SayText>
+    </Response>
+
+</Clue>
+
+<Clue id="3" name="Twain" displayName="Mark Twain's secret compartment" graphic="twain">
+
+    <Response npc="Twain">
+        <SayText type="char">What's this about you and a secret compartment here in this cabin?</SayText>
+        <SayText type="npc">That's nonsense!*tremble* Of course I don't have a secret compartment.</SayText>
+        <SayText type="char">Then you won't mind if I have a look around.</SayText>
+        <SayText type="npc">Of... of course not!*tremble* I have nothing to hide!</SayText>
+        <Action type="waitContinue" data="null" />
+        <Action type="callFunc" data="startKnockingGame" />
+    </Response>
+
+    <Response npc="NyTimes">
+        <SayText type="npc">I saw Mark Twain hiding something in a secret compartment in his cabin! Maybe it was Edison's device!</SayText>
+    </Response>
+
+    <Response npc="Edison">
+        <SayText type="npc">Yes, I think the device could fit in a space that size. You should investigate!</SayText>
+    </Response>
+
+    <Response npc="LeMonde">
+        <SayText type="npc">After the comments he's made about people from other countries, I wouldn't put anything past Twain.</SayText>
+    </Response>
+
+    <Response npc="Coal">
+        <SayText type="npc">He wrote Tom Sawyer, didn't he?*proud* I love that song.</SayText>
+    </Response>
+
+    <Response npc="Weisz">
+        <SayText type="npc">Anything can be hidden from the casual observer.</SayText>
+    </Response>
+
+    <Response npc="Eiffel">
+        <SayText type="npc">Odd, I don't think my cabin has a hidden compartment.</SayText>
+    </Response>
+
+    <Response npc="Ferris">
+        <SayText type="npc">Why are you asking me about Twain's cabin?</SayText>
+    </Response>
+
+    <Response npc="Porter">
+        <SayText type="npc">Hmph, I would know if our train cars contained hidden compartments. At least, I think I would...</SayText>
+    </Response>
+
+    <Response npc="Anthony">
+        <SayText type="npc">Nothing is more frustrating than when someone is withholding what's rightfully yours, wouldn't you say?</SayText>
+    </Response>
+
+
+    <Response npc="player">
+        <SayText type="thought">The reporter said Mark Twain is hiding something in a secret compartment. I should investigate.</SayText>
+    </Response>
+
+    <Response npc="default">
+        <SayText type="npc">Why are you asking me about Twain's cabin?</SayText>
+    </Response>
+
+</Clue>
+
+<Clue id="4" name="PruneJuice" displayName="prune juice stains" graphic="prunejuice">
+
+    <Response npc="Edison">
+        <SayText type="npc">Interesting... it looks like the trail heads away from my cabin and toward the coal car.</SayText>
+    </Response>
+
+    <Response npc="Anthony">
+        <SayText type="npc">I love prune juice, but I haven't had any yet on this trip.</SayText>
+    </Response>
+
+    <Response npc="LeMonde">
+        <SayText type="npc">The only place to get prune juice on board is on the dining car.</SayText>
+    </Response>
+
+    <Response npc="NyTimes">
+        <SayText type="npc">Prune juice? Blech!</SayText>
+    </Response>
+
+    <Response npc="CoalMan">
+        <SayText type="npc">Such a waste of delicious prune juice!</SayText>
+    </Response>
+
+    <Response npc="Twain">
+        <SayText type="npc">Prune juice is the last thing I need with this motion sickness.</SayText>
+    </Response>
+
+    <Response npc="Eiffel">
+        <SayText type="npc">Is the juice fermented? Non? Then I shall pass.</SayText>
+    </Response>
+
+    <Response npc="Ferris">
+        <SayText type="npc">I can't help you. Sorry.</SayText>
+    </Response>
+
+    <Response npc="Weisz">
+        <SayText type="npc">I only drink water. It's the healthiest drink.</SayText>
+    </Response>
+
+    <Response npc="Porter">
+        <SayText type="npc">I can't tell you what our passengers ordered! That is confidential information!</SayText>
+        <Action type="waitContinue" data="null" />
+		<Action type="removeClue" data="4" />
+        <Action type="callFunc" data="startOrderPage" />
+    </Response>
+
+    <Response npc="player">
+        <SayText type="thought">There were fresh prune juice stains on the floor outside Edison's cabin. That could mean that the thief was drinking it. I need to find out who ordered prune juice.</SayText>
+    </Response>
+
+</Clue>
+
+<Clue id="5" name="CoalSmudges" displayName="coal smudges" graphic="coalsmudges">
+
+    <Response npc="CoalMan">
+        <SayText type="npc">Okay, okay!*grief* I did leave to |get a snack|, and that's when the train stopped. But I didn't go near the luggage! You can ask the Porter!</SayText>
+        <Action type="addClue" data="6" />
+        <Action type="removeClue" data="5" />
+    </Response>
+
+    <Response npc="Edison">
+        <SayText type="npc">Coal isn't easy to wash off. Whoever was in the luggage area probably still has coal marks on them.</SayText>
+    </Response>
+
+    <Response npc="Anthony">
+        <SayText type="npc">Why don't you ask the coal man about it?</SayText>
+    </Response>
+
+    <Response npc="LeMonde">
+        <SayText type="npc">Such filth... I shudder to imagine getting that foulness on myself!</SayText>
+    </Response>
+
+    <Response npc="NyTimes">
+        <SayText type="npc">That's coal, no doubt about it. Pretty obvious who that points to.</SayText>
+    </Response>
+
+    <Response npc="Twain">
+        <SayText type="npc">Urk, those coal fumes... Get it away from me!</SayText>
+    </Response>
+
+    <Response npc="Eiffel">
+        <SayText type="npc">To think, a rock that is thousands of years old can power a train!</SayText>
+    </Response>
+
+    <Response npc="Ferris">
+        <SayText type="npc">I explored the idea of powering my wheel with coal, but the smoke would be too unpleasant for the passengers.</SayText>
+    </Response>
+
+    <Response npc="Porter">
+        <SayText type="npc">Coal smudges!?*stomp* What was that incompetent coal man doing in the luggage car?</SayText>
+    </Response>
+
+    <Response npc="Weisz">
+        <SayText type="npc">Coal dust is black as night. That could come in handy someday.</SayText>
+    </Response>
+
+    <Response npc="player">
+        <SayText type="thought">That's odd... what was the coal man doing around the passengers' luggage?</SayText>
+    </Response>
+
+    <Response npc="default">
+        <SayText type="npc">Why don't you ask the coal man about it?</SayText>
+    </Response>
+
+</Clue>
+
+<Clue id="6" name="Snack" displayName="coal man left for a snack" graphic="snack">
+    
+    <Response npc="CoalMan">
+        <SayText type="npc">I just left for a snack. I didn't go near the luggage!*grief* You can ask the Porter.</SayText>
+    </Response>
+    
+    <Response npc="Porter">
+        <SayText type="npc">That's true, he was here getting something to eat when the train stopped. So he couldn't have stopped the train.</SayText>
+        <Action type="removeClue" data="6" />
+        <Action type="completeEvent" data="train_investigatedCoal" />
+    </Response>
+
+    <Response npc="CoalMan">
+        <SayText type="npc">I didn't go near the luggage!*grief* You can ask the porter!</SayText>
+    </Response>
+
+    <Response npc="Edison">
+        <SayText type="npc">The porter doesn't take orders from the coal man. The coal man would have had to have left the coal car.</SayText>
+    </Response>
+
+    <Response npc="Anthony">
+        <SayText type="npc">I suppose it's possible that someone else could have snuck into the coal car if the coal man left.</SayText>
+    </Response>
+
+    <Response npc="LeMonde">
+        <SayText type="npc">Americans*laugh* - always eating!</SayText>
+    </Response>
+
+    <Response npc="NyTimes">
+        <SayText type="npc">If it had been the coal man I'd heard, we probably would have seen coal footprints on the floor instead of prune juice stains.</SayText>
+    </Response>
+
+    <Response npc="Twain">
+        <SayText type="npc">No one around here values the sweet sting of sweat in their eyes from a hard day's work.</SayText>
+    </Response>
+
+    <Response npc="Eiffel">
+        <SayText type="npc">I was here the whole time, but I don't remember seeing the coal man. Perhaps he took a different route to the dining car?</SayText>
+    </Response>
+
+    <Response npc="Ferris">
+        <SayText type="npc">Sometimes I think I should have taken a common job like the coal man did.</SayText>
+    </Response>
+
+    <Response npc="Weisz">
+        <SayText type="npc">The porter should know if the coal man left the coal car.</SayText>
+    </Response>
+
+
+    <Response npc="player">
+        <SayText type="thought">The coal man says he was getting a snack. I need to find someone who can support his alibi.</SayText>
+    </Response>
+
+    <Response npc="default">
+        <SayText type="npc">The porter should know if the coal man was getting a snack.</SayText>
+    </Response>
+
+</Clue>
+
+<Clue id="7" name="TeslaPrune" displayName="Nikola Tesla ordered prune juice" graphic="tesla">
+
+    <Response npc="Porter">
+        <SayText type="npc">How did you see what was written on my orders sheet?*stomp* It must be miles away by now!</SayText>
+    </Response>
+
+    <Response npc="CoalMan">
+        <SayText type="npc">The porter never takes my order, because I'm not a passenger.</SayText>
+    </Response>
+
+    <Response npc="Edison">
+        <SayText type="npc">Tesla hasn't left his cabin since we left Washington D.C. The prune juice must be catching up to him by now.</SayText>
+    </Response>
+
+    <Response npc="Anthony">
+        <SayText type="npc">It is strange that Tesla won't leave his room, even ordering room service instead of going to the dining car.</SayText>
+    </Response>
+
+    <Response npc="LeMonde">
+        <SayText type="npc">Tesla has awful taste - not that there are any good options on the menu.</SayText>
+    </Response>
+
+    <Response npc="NyTimes">
+        <SayText type="npc">How can somebody make it this long without going to the bathroom?</SayText>
+    </Response>
+
+    <Response npc="Twain">
+        <SayText type="npc">Tesla got his prune juice already? Then why am I still waiting for my bicarbonate of soda?</SayText>
+    </Response>
+
+    <Response npc="Eiffel">
+        <SayText type="npc">If Tesla won't talk to you himself, perhaps you could see if there's any more evidence in his luggage.</SayText>
+    </Response>
+
+    <Response npc="Ferris">
+        <SayText type="npc">I guess you'd expect someone as brilliant as Tesla to have some quirks.</SayText>
+    </Response>
+
+    <Response npc="Weisz">
+        <SayText type="npc">If Tesla made that juice disappear in a flash, it'll probably reappear just as quickly.</SayText>
+    </Response>
+
+    <Response npc="player">
+        <SayText type="thought">I need to ask Tesla a few questions, but he won't talk to me. Maybe there's a clue in his luggage?</SayText>
+    </Response>
+
+</Clue>
+
+<Clue id="8" name="GrainyPicture" displayName="grainy picture" graphic="grainypic">
+
+    <Response npc="Edison">
+        <SayText type="char">When we went around that curve, Tesla was all the way on the other side of the train!</SayText>
+        <SayText type="npc">I knew it. But you realize what this means?</SayText>
+        <SayText type="char">The thief is still on the loose!</SayText>
+        <SayText type="npc">Make haste and talk to Tesla. Perhaps he knows something that can help us.</SayText>
+    </Response>
+
+    <Response npc="Pinkerton">
+        <SayText type="char">I have proof that Mr. Tesla is innocent!</SayText>
+        <SayText type="npc">Buzz off. This one's open and shut.</SayText>
+    </Response>
+
+    <Response npc="Porter">
+        <SayText type="npc">I've always enjoyed the view of the train going around that curve. Who knew it could be used to solve a crime?</SayText>
+    </Response>
+
+    <Response npc="CoalMan">
+        <SayText type="npc">Good thing we had to slow down to go around that curve, or the image might have been blurry.</SayText>
+    </Response>
+
+    <Response npc="Anthony">
+        <SayText type="npc">What sort of wizardry is this? That looks just like Nikola Tesla!</SayText>
+    </Response>
+
+    <Response npc="LeMonde">
+        <SayText type="npc">In the future, this kind of technology will probably be a great help to police and reporters.</SayText>
+    </Response>
+
+    <Response npc="NyTimes">
+        <SayText type="npc">Wow,*proud* where can I get a device like that?</SayText>
+    </Response>
+
+    <Response npc="Twain">
+        <SayText type="npc">Nothing can surpass the written word for truth and clarity.</SayText>
+    </Response>
+
+    <Response npc="Eiffel">
+        <SayText type="npc">Incredible!*proud* Mr. Edison's device could see so far out the window!</SayText>
+    </Response>
+
+    <Response npc="Ferris">
+        <SayText type="npc">Hmph,*cry* I guess the motion capture device will be the main attraction at the fair if I can't fix the wheel.</SayText>
+    </Response>
+
+    <Response npc="Weisz">
+        <SayText type="npc">I can see why someone would steal that. You could make a lot of money with such a device.</SayText>
+    </Response>
+
+    <Response npc="player">
+        <SayText type="thought">When we went around that curve, Tesla was all the way on the other side of the train! The thief is still on the loose!</SayText>
+    </Response>
+
+</Clue>
+
+<Clue id="9" name="Briefcase" displayName="open briefcase" graphic="briefcase">
+
+    <Response npc="Tesla">
+        <SayText type="npc">I don't know how it was opened.*grief* The key is still around my neck!</SayText>
+    </Response>
+
+    <Response npc="Weisz">
+        <SayText type="npc">That lock looks like it was picked by an expert.*proud* No, |I don't know anyone| like that. Excuse me.</SayText>
+        <Action type="addClue" data="10" />
+    </Response>
+
+    <Response npc="Edison">
+        <SayText type="npc">I've never invented a gizmo to break through a lock. That would be unethical.</SayText>
+    </Response>
+    <Response npc="Porter">
+        <SayText type="npc">Nobody could have gotten in through Tesla's cabin. Our doors are impregnable!</SayText>
+    </Response>
+    <Response npc="CoalMan">
+        <SayText type="npc">I'd have to save up for a fancy case like that, but I'd get coal dust all over it.</SayText>
+    </Response>
+    <Response npc="Anthony">
+        <SayText type="npc">Tesla should have used a case with a combination lock. Keys can be stolen or copied.</SayText>
+    </Response>
+    <Response npc="LeMonde">
+        <SayText type="npc">A high-end model. Functional and fashionable.</SayText>
+    </Response>
+    <Response npc="NyTimes">
+        <SayText type="npc">It wouldn't have been easy to get into that case without a good set of tools.</SayText>
+    </Response>
+    <Response npc="Twain">
+        <SayText type="npc">What a ride. I didn't expect the great train robbery!</SayText>
+    </Response>
+    <Response npc="Eiffel">
+        <SayText type="npc">I should keep my own effects close at hand. There are thieves about!</SayText>
+    </Response>
+    <Response npc="Ferris">
+        <SayText type="npc">How was the case opened? More importantly, what was in the case?</SayText>
+    </Response>
+
+    <Response npc="player">
+        <SayText type="thought">Tesla has the only key. How did the thief open the briefcase?</SayText>
+    </Response>
+
+    <Response npc="default">
+        <SayText type="npc">The case doesn't look damaged. You should find someone who could have picked the lock.</SayText>
+    </Response>
+
+</Clue>
+
+<Clue id="10" name="Weisz" displayName="Erik Weisz's odd behavior" graphic="weisz">
+    <Response npc="Weisz">
+        <SayText type="npc">I don't know what you're talking about!</SayText>
+    </Response>
+    
+    <Response npc="Anthony">
+        <SayText type="npc">Mr. Weisz is very strange. He seems to appear and disappear at will.</SayText>
+    </Response>
+
+    <Response npc="Twain">
+        <SayText type="npc">Weisz? What kind of a name is Weisz?*laugh* I don't trust him.</SayText>
+    </Response>
+
+    <Response npc="Edison">
+        <SayText type="npc">Of everyone on board, only Mr. Weisz seems to have no reason to be here.</SayText>
+    </Response>
+
+    <Response npc="Eiffel">
+        <SayText type="npc">I have not spoken with Monsieur Weisz. I haven't even seen him.</SayText>
+    </Response>
+
+    <Response npc="Ferris">
+        <SayText type="npc">He did ask me about the inner workings of my wheel. He seemed a little too interested.</SayText>
+    </Response>
+
+    <Response npc="Tesla">
+        <SayText type="npc">I saw him lurking around near my cabin earlier. I got distracted, and when I turned back he had vanished.</SayText>
+    </Response>
+
+    <Response npc="LeMonde">
+        <SayText type="npc">I think I saw him heading toward the coal car earlier.</SayText>
+    </Response>
+
+    <Response npc="CoalMan">
+        <SayText type="npc">Nope, haven't seen him up here.</SayText>
+    </Response>
+
+    <Response npc="Porter">
+        <SayText type="npc">Mr. Weisz is a paying customer. I know nothing more.</SayText>
+    </Response>
+
+    <Response npc="NyTimes">
+        <SayText type="npc">Something has been bothering me about this Weisz character. Doesn't he look familiar? Look at this article.</SayText>
+        <Action type="waitContinue" data="null" />
+		<Action type="addClue" data="11" />
+        <Action type="callFunc" data="getNewspaper" />
+    </Response>
+
+    <Response npc="player">
+        <SayText type="thought">Weisz acted strangely when he mentioned that the lock was picked by an expert.</SayText>
+    </Response>
+
+    <Response npc="default">
+        <SayText type="npc">I don't know anything about Erik Weisz.</SayText>
+    </Response>
+
+</Clue>
+
+<Clue id="11" name="TimesArticle" displayName="NY Times article" graphic="nytimes">
+
+    <Response npc="Weisz">
+        <SayText type="npc">You've found out my true identity, but can you catch me?</SayText>
+        <Action type="removeClue" data="10" />
+        <Action type="waitContinue" data="null" />
+    </Response>
+
+    <Response npc="Anthony">
+        <SayText type="npc">All this time, we were traveling with a famous magician?</SayText>
+    </Response>
+    <Response npc="Twain">
+        <SayText type="npc">Houdini's trickery and flimflammery don't impress me.</SayText>
+    </Response>
+    <Response npc="Edison">
+        <SayText type="npc">Houdini? The Harry Houdini? You should take a closer look in his cabin.</SayText>
+    </Response>
+    <Response npc="Eiffel">
+        <SayText type="npc">I understand how Monsieur Houdini would break into Tesla's briefcase, but I do not understand why.</SayText>
+    </Response>
+    <Response npc="Ferris">
+        <SayText type="npc">They do look a lot alike.</SayText>
+    </Response>
+    <Response npc="Tesla">
+        <SayText type="npc">It must have been Houdini who broke into my briefcase.*grief* Find him!</SayText>
+    </Response>
+    <Response npc="LeMonde">
+        <SayText type="npc">Like most Americans, Houdini is a thief. Did you know he stole his name from the French magician Robert Houdin?</SayText>
+    </Response>
+    <Response npc="CoalMan">
+        <SayText type="npc">I don't recall seeing Weisz onboard. I'm sure I would have recognized him. Everyone knows Houdini!</SayText>
+    </Response>
+    <Response npc="Porter">
+        <SayText type="npc">I did think it was strange that this Weisz fellow was onboard with so many celebrities.</SayText>
+    </Response>
+    <Response npc="NyTimes">
+        <SayText type="npc">Houdini can definitely pick a lock. Maybe his lockpicks are still in his room.</SayText>
+    </Response>
+
+
+    <Response npc="player">
+        <SayText type="thought">Erik Weisz looks a lot like Harry Houdini. Could they be the same person?</SayText>
+    </Response>
+
+    <Response npc="default">
+        <SayText type="npc">They do look a lot alike.</SayText>
+    </Response>
+
+</Clue>
+<Clue id="12" name="Tesla" displayName="Nikola Tesla is hiding something" graphic="tesla">
+
+    <Response npc="Tesla">
+        <SayText type="char">All right, Tesla, come clean. What were you hiding?</SayText>
+        <SayText type="npc">Let me out of here and I'll talk.[pick his lock]</SayText>
+        <SayText type="npc">I was carrying a small transformer capable of generating an enormous amount of wattage. Only this device would provide enough electricity to power the Ferris Wheel.</SayText>
+        <SayText type="char">Why would somebody steal that?</SayText>
+        <SayText type="npc">Egotistic fools – nobody wants to be upstaged by the Wheel!</SayText>
+    </Response>
+
+    <Response npc="Anthony">
+        <SayText type="npc">I can't imagine what Tesla had in that case. You should ask him.</SayText>
+    </Response>
+    <Response npc="Twain">
+        <SayText type="npc">Don't ask me about Tesla's tomfoolery. Ask Tesla.</SayText>
+    </Response>
+    <Response npc="Edison">
+        <SayText type="npc">Professional curiosity does lead me to wonder what Tesla had in that case.</SayText>
+    </Response>
+    <Response npc="Eiffel">
+        <SayText type="npc">If you know what was stolen from Tesla, you may be able to determine who had the motive.</SayText>
+    </Response>
+    <Response npc="Ferris">
+        <SayText type="npc">Whatever Tesla had might have been able to help me.*grief* Please, you've got to find it!</SayText>
+    </Response>
+    <Response npc="LeMonde">
+        <SayText type="npc">I'm sure Tesla was carrying another one of his useless gadgets.</SayText>
+    </Response>
+    <Response npc="CoalMan">
+        <SayText type="npc">If I wanted this much excitement in the workplace, I'd have taken that whaling job on the Pequod!</SayText>
+    </Response>
+    <Response npc="Porter">
+        <SayText type="npc">I'd tell you to stop bothering my passengers, but I guess we're well past that point.</SayText>
+    </Response>
+    <Response npc="NyTimes">
+        <SayText type="npc">If you can find out what was in that case, you'll have the scoop of a lifetime.</SayText>
+    </Response>
+
+    <Response npc="player">
+        <SayText type="thought">Weisz... er, Houdini... said to find what Tesla was hiding, and I would find the thief.</SayText>
+
+    </Response>
+
+</Clue>
+<Clue id="13" name="Transformer" displayName="transformer" graphic="transformer">
+
+    <Response npc="Edison">
+        <SayText type="npc">Hmph. Inferior workmanship.</SayText>
+    </Response>
+
+    <Response npc="Ferris">
+        <SayText type="npc">It's the very thing that could save my wheel!*grief* You've got to find it!</SayText>
+    </Response>
+
+    <Response npc="Anthony">
+        <SayText type="npc">That drawing means nothing to me, but if you asked me, I'd say Gustave Eiffel is the most likely suspect. He has the most to lose if the Ferris Wheel is a success.</SayText>
+    </Response>
+
+    <Response npc="Twain">
+        <SayText type="npc">You still don't know who the thief is, and you've talked to everyone on board – except that |mysterious fellow| in the last car. Talk to him and you may find the truth.</SayText>
+        <Action type="addClue" data="14" />
+    </Response>
+
+    <Response npc="LeMonde">
+        <SayText type="npc">Electrical? How gauche.*laugh* Monsieur Eiffel's tower never needed such artificial assistance.</SayText>
+    </Response>
+
+    <Response npc="NyTimes">
+        <SayText type="npc">Buddy, nobody in the big city is going to read a story about this little gizmo.*laugh* But the Ferris Wheel - now that's a scoop!</SayText>
+    </Response>
+
+    <Response npc="CoalMan">
+        <SayText type="npc">If it ain't coal-fired, I ain't interested.</SayText>
+    </Response>
+
+    <Response npc="Porter">
+        <SayText type="npc">That looks quite small. It could be hidden almost anywhere on this train!</SayText>
+    </Response>
+
+    <Response npc="Eiffel">
+        <SayText type="npc">Electrical engineering is beyond me. I build solid structures.</SayText>
+    </Response>
+
+    <Response npc="Tesla">
+        <SayText type="npc">My transformer - my greatest invention!</SayText>
+    </Response>
+
+    <Response npc="player">
+        <SayText type="thought">This looks like it belongs in the Ferris Wheel.</SayText>
+    </Response>
+
+    <Response npc="default">
+        <SayText type="npc">I don't know anything about that.</SayText>
+    </Response>
+
+</Clue>
+
+<Clue id="14" name="Silhouette" displayName="mysterious fellow in the last car" graphic="silhouette">
+
+    <Response npc="Edison">
+        <SayText type="npc">It would take a genius to thwart the security and reach the last car. Are you a genius?</SayText>
+    </Response>
+
+    <Response npc="Ferris">
+        <SayText type="npc">Please, get to the last car and talk to the mysterious person! You're my only hope!</SayText>
+    </Response>
+
+    <Response npc="Anthony">
+        <SayText type="npc">The Pinkerton guard is a tough cookie, but I saw him napping outside the last car. Maybe you can sneak by.</SayText>
+    </Response>
+
+    <Response npc="Twain">
+        <SayText type="npc">You still don’t know who the thief is, and you’ve talked to everyone on board – except that mysterious fellow in the last car. Talk to him and you may find the truth.</SayText>
+    </Response>
+
+    <Response npc="LeMonde">
+        <SayText type="npc">Good luck trying to get past all of the traps at the rear of the car.</SayText>
+    </Response>
+
+    <Response npc="NyTimes">
+        <SayText type="npc">I have a theory about who's on the last car. I think it's someone very important. You should go check it out.</SayText>
+    </Response>
+
+    <Response npc="CoalMan">
+        <SayText type="npc">Don't ask me who's back there. I've learned my lesson about leaving the coal car.</SayText>
+    </Response>
+
+    <Response npc="Eiffel">
+        <SayText type="npc">Let the spirit of curiosity take you wherever it may lead!</SayText>
+    </Response>
+
+    <Response npc="Tesla">
+        <SayText type="npc">That fellow has the right idea. Leaving your cabin is never a good idea.</SayText>
+    </Response>
+
+    <Response npc="Porter">
+        <SayText type="npc">Security is tight in the last car. But I wouldn't put anything past you.</SayText>
+    </Response>
+
+    <Response npc="player">
+        <SayText type="thought">There's a mysterious fellow in the last car, but it's heavily guarded.</SayText>
+    </Response>
+
+    <Response npc="default">
+        <SayText type="npc">I don't know who's in the last car, and I don't think they want us to know, either.</SayText>
+    </Response>
+
+</Clue>
+
+<Clue id="15" name="Trunk" displayName="French items in trunk" graphic="trunk">
+
+    <Response npc="Edison">
+        <SayText type="npc">All those French curios must point to Gustave Eiffel!</SayText>
+    </Response>
+
+    <Response npc="Ferris">
+        <SayText type="npc">Mr. Eiffel is trying to sabotage me?*grief* No, I don't believe it!</SayText>
+    </Response>
+
+    <Response npc="Twain">
+        <SayText type="npc">You never could trust a Frenchman.</SayText>
+    </Response>
+
+    <Response npc="Anthony">
+        <SayText type="npc">What a long way to travel just to commit a crime.</SayText>
+    </Response>
+
+    <Response npc="Tesla">
+        <SayText type="npc">Another promising mind done in by his own ego.</SayText>
+    </Response>
+
+    <Response npc="Porter">
+        <SayText type="npc">The evidence is overwhelming. Monsieur Eiffel is in the cabin car.</SayText>
+    </Response>
+
+    <Response npc="CoalMan">
+        <SayText type="npc">I'd still like to see his tower one day.</SayText>
+    </Response>
+
+    <Response npc="NyTimes">
+        <SayText type="npc">This never would have happened if the fair had been held in New York*stomp* instead of Chicago.</SayText>
+    </Response>
+
+    <Response npc="Eiffel">
+        <SayText type="npc">It's true: I'm French. But you've overlooked one very important detail. This is a lady's handkerchief!</SayText>
+        <SayText type="char">It must be the Le Monde reporter. She doesn't want the Chicago fair to upstage Paris!</SayText>
+        <Action type="waitContinue" data="null" />
+        <Action type="callFunc" data="startLeMondeChase" />
+    </Response>
+
+    <Response npc="player">
+        <SayText type="thought">Various French books and other items from France... and a handkerchief smudged with coal dust!</SayText>
+    </Response>
+
+    <Response npc="default">
+        <SayText type="npc">Don't ask me. It's not my trunk.</SayText>
+    </Response>
+
+</Clue>
+
+<Clue id="16" name="PinkertonBlock" displayName="Pinkerton blocking the way" graphic="pinkerton">
+
+    <Response npc="player">
+        <SayText type="thought">I need to talk to Tesla in the coal car, but the Pinkerton agent is blocking the entrance.</SayText>
+    </Response>
+	
+	<Response npc="Edison">
+        <SayText type="npc">If you can't go through him, you could always try going over or around the guard.</SayText>
+    </Response>
+
+    <Response npc="Ferris">
+        <SayText type="npc">The guard won't stop you from heading back that way, I'm sure.</SayText>
+    </Response>
+
+    <Response npc="Twain">
+        <SayText type="npc">A brave person could probably move about the train by walking on top of it. Or a foolish person!</SayText>
+    </Response>
+
+    <Response npc="Anthony">
+        <SayText type="npc">Don't expect the Pinkerton man to listen to reason. He wouldn't even take a pamphlet!</SayText>
+    </Response>
+
+    <Response npc="Tesla">
+        <SayText type="npc">I do not like that guard one bit.</SayText>
+    </Response>
+
+    <Response npc="Porter">
+        <SayText type="npc">Even I don't have the authority to move the guard from his post.</SayText>
+    </Response>
+
+    <Response npc="CoalMan">
+        <SayText type="npc">You don't need my help. You already found your way in here!</SayText>
+    </Response>
+
+    <Response npc="NyTimes">
+        <SayText type="npc">You'll never outmuscle that guard. You'll have to outfox him.</SayText>
+    </Response>
+
+    <Response npc="Eiffel">
+        <SayText type="npc">When all else fails, look to the sky!</SayText>
+    </Response>
+	
+	<Response npc="LeMonde">
+        <SayText type="npc">Some of these train cars have hatches on the roof.</SayText>
+    </Response>
+
+    <Response npc="default">
+        <SayText type="npc">I'd stay away from the Pinkerton man if I were you.</SayText>
+    </Response>
+
+</Clue>
+
+</Clues>

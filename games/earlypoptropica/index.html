@@ -1,0 +1,2102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poptropica: Legacy</title>
+    <link rel="icon" href="data:,">
+    <script>window.RufflePlayer = window.RufflePlayer || {}; window.RufflePlayer.config = { quality: "low" };</script>
+    <script src="../../ruffle/ruffle.js"></script>
+    <style>
+        body, embed, ruffle-player, ruffle-embed { background-color: #139ffd; }
+        body { margin: 0; width: 100vw; height: 100vh; overflow: hidden; }
+
+        #game, #game-menu { position: absolute; outline-width: 0; }
+        #stage { position: absolute; transform-origin: 0 0; }
+
+        #accountsBtn {
+            position: fixed; right: 10px; bottom: 10px; z-index: 10;
+            font: 12px/1.4 system-ui, sans-serif; padding: 5px 9px;
+            color: #fff; background: #0b6fd0; border: 1px solid #5fb4f5;
+            border-radius: 4px; cursor: pointer;
+        }
+        #accountsBtn:hover { background: #0a5aa8; }
+
+        #fsBtn {
+            position: fixed; left: 10px; bottom: 10px; z-index: 10;
+            font: 12px/1.4 system-ui, sans-serif; padding: 5px 9px;
+            color: #fff; background: #0b6fd0; border: 1px solid #5fb4f5;
+            border-radius: 4px; cursor: pointer;
+        }
+        #fsBtn:hover { background: #0a5aa8; }
+
+        #accountsPanel {
+            position: fixed; right: 10px; bottom: 46px; z-index: 11;
+            width: 240px; max-height: 50vh; overflow: auto;
+            font: 12px/1.5 system-ui, sans-serif; color: #fff;
+            background: #0a4f92; border: 1px solid #5fb4f5; border-radius: 6px;
+            padding: 10px 12px; box-shadow: 0 6px 24px rgba(0, 0, 0, .45);
+        }
+        #accountsPanel h2 { margin: 0 0 8px; font-size: 13px; font-weight: 600; }
+        #accountsPanel h2 span { display: block; font-size: 11px; font-weight: 400; opacity: .75; }
+        #accountsList { list-style: none; margin: 0 0 8px; padding: 0; }
+        #accountsList li { display: flex; align-items: center; gap: 6px; padding: 4px 0; border-bottom: 1px solid rgba(255, 255, 255, .15); }
+        #accountsList b { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #accountsList i { font-style: normal; font-size: 11px; opacity: .75; }
+        .accountsActions { display: flex; gap: 6px; margin: 8px 0; }
+        #accountsNote { margin: 0 0 8px; font-size: 11px; color: #d6ecff; }
+        #accountsNote.bad { color: #ffd9a8; }
+        #accountsList button, #accountsClose, .accountsActions button {
+            font: inherit; color: #fff; background: #0b6fd0;
+            border: 1px solid #5fb4f5; border-radius: 3px; padding: 1px 6px; cursor: pointer;
+        }
+        #accountsList button:hover, #accountsClose:hover { background: #0a5aa8; }
+        #accountsEmpty { font-style: italic; opacity: .8; }
+        #accountsSave { margin: 0 0 8px; font-size: 11px; opacity: .8; }
+        #accountsChar {
+            margin: 8px 0 0; padding-top: 6px; font-size: 11px; line-height: 1.45;
+            max-height: 150px; overflow: auto; border-top: 1px solid rgba(255, 255, 255, .15);
+        }
+        #accountsChar div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        #errorText {
+            position: absolute;
+            left: 0px;
+            top: calc(50vh + 322.5px);
+            width: 100vw;
+            color: white;
+            font-size: 1.6em;
+            font-family: "Billy Serif";
+            text-align: center;
+        }
+
+        @font-face {
+            font-family: "Billy Serif";
+            src: url(flashpoint/billySerif.ttf) format("truetype");
+        }
+    </style>
+</head>
+<body>
+    <div id="errorText" hidden>Multiplayer features are unavailable.</div>
+
+    <button id="accountsBtn" type="button">Accounts</button>
+    <button id="fsBtn" type="button">Fullscreen</button>
+    <div id="accountsPanel" tabindex="-1" hidden>
+        <h2>Local accounts<span>saved in this browser only</span></h2>
+        <div id="accountsSave"></div>
+        <ul id="accountsList"></ul>
+        <div id="accountsChar"></div>
+        <div class="accountsActions">
+            <button id="accountsExport" type="button">Export</button>
+            <button id="accountsImport" type="button">Import</button>
+            <button id="accountsLook" type="button">Change look</button>
+        </div>
+        <input id="accountsFile" type="file" accept="application/json,.json" hidden>
+        <div id="accountsNote"></div>
+        <button id="accountsClose" type="button">Close</button>
+    </div>
+    <script>
+/*
+    Static port of the curation's base.php.
+
+    base.php is the server-side bootstrap for this Flashpoint gamezip: it reads the
+    request parameters, picks which start-up SWF to embed and at what size, and
+    exposes the handful of JS callbacks the SWFs call back into. The only parts that
+    need a server are the parameter transport and the .php endpoints; here the
+    parameters travel in the query string, and the SWF names that used to be PHP are
+    static pages (index.htm / home.htm / base.html / the base.php and index.php
+    directories all serve this same file).
+
+    Stages, in the order the client walks them:
+        saveData.swf   800x480  state=init                 Home screen + save toolbar
+        createUser.swf          state=return_user_standard first-run character creation
+        framework.swf  1010x645 state=return_user_standard the island client
+
+    Embeds are built by mountGame()/mountMenu() rather than by mutating one <embed>:
+    Ruffle polyfills embeds when they appear in the document, and an element whose
+    src is assigned later - without type="application/x-shockwave-flash" - is never
+    upgraded, which leaves a blank page.
+*/
+"use strict";
+
+const SCENE_FP_RESTART = "FlashpointIslandRestart",
+      SCENE_FP_START = "Home";
+
+const STATE_SCENE = 0,
+      STATE_FP_AD = 1,
+      STATE_FP_RESTART = 2,
+      STATE_FP_START = 3,
+      STATE_FP_CREATE = 4;
+
+// Relative, not root-absolute: this mirror is served from a subdirectory.
+const SWF_STATES = [ "framework.swf", "flashpoint/adSkip.swf", "flashpoint/restartIsland.swf",
+                     "flashpoint/saveData.swf", "flashpoint/createUser.swf" ];
+
+const COOKIE_ADS = "ads",
+      COOKIE_CHARS = "charLazyLoad",
+      COOKIE_NEW_USER = "ready";
+
+const PATH_DEFAULT = "gameplay";
+const PAGE_BASE = "base.html"; // this page under the name the SWFs navigate to.
+
+const errorText = document.getElementById("errorText"),
+      lsKey = "lastScene";
+
+/*
+   The client posts to a handful of legacy endpoints with a leading slash, so they
+   land on the site root where a static host answers 405/501 - and a host has no way
+   to run them, since they are POSTs. sw.js can only catch the ones inside this
+   folder, and a private window has no service worker at all. Answer them here, in
+   the page, before Ruffle's loader gets a chance to send them: Ruffle fetches
+   through window.fetch, so this sees the request first in every browser.
+
+   getPrefix is the one that matters: its reply becomes the base the client resolves
+   framework/data/config.xml against, and an unanswered POST left it absolute, which
+   is what turned that reasonably-relative path into a 404 against the site root.
+*/
+(function answerLegacyEndpoints() {
+    // Only the replies the client actually reads are listed. Anything else it calls
+    // falls through to the generic answer below, which is the point: the SWFs carry
+    // around sixty distinct root-absolute *.php calls (items, badges, quizzes,
+    // quidgets, telemetry ...), so an explicit list means a fresh 501 the first time
+    // a scene reaches one it has not met yet - which is exactly what happened with
+    // get_mem_status.php and get_island_info.php.
+    const ANSWERS = {
+        // Empty, not ".": the client concatenates this straight onto paths like
+        // "images//flags/flag-index.txt", so a dot turns them into ".images/..." and
+        // every one of them 404s. Empty keeps them relative, which resolves beside
+        // the SWF and is what this mirror serves.
+        "getPrefix.php": "prefix=",
+
+        // StatusManager.checkStatus reads receiver.answer and, unless it is exactly
+        // "ok", calls showStatusPopup(receiver.answer, receiver.message) - which loads
+        // popups/status.swf over the scene. status_ok alone sent every check down that
+        // path; it is kept for the callers that read that field instead.
+        "status.php": "answer=ok&status_ok=1&success=1&ok=1",
+
+        "get_campaign_list.php": "ok=1&success=1",
+        "visit_scene.php": "ok=1&success=1",
+
+        // reset_island acts only on answer=="ok" ("&& !noRestart"), so the generic ok
+        // body made the restart a no-op.
+        "reset_island.php": "answer=ok&success=1&ok=1",
+
+        // FeedItemManager and the promo-code panel gate on answer=="ok" as well.
+        // Keys are basenames: the lookup takes the last path segment, so a key with a
+        // folder in it ("feed/save_feed_item.php") silently never matches.
+        "save_feed_item.php": "answer=ok&success=1&ok=1",
+        "get_promo_code_uses.php": "answer=ok&json={}",
+
+        // time_limited_is_active parses receiver.json unconditionally under
+        // answer=="ok", so it needs a parseable object rather than a flag.
+        "time_limited_is_active.php": "answer=ok&json={}",
+
+        // ScenePhotoManager gates both of these on answer=="ok" and then parses a json
+        // blob of photo rows, so the generic ok body made them do nothing while
+        // get_user_photos traced an error. An empty object is the honest reply for a
+        // mirror with no server-side rows, and it parses cleanly into zero photos.
+        "get_scene_photos.php": "answer=ok&json={}",
+        "get_user_photos.php": "answer=ok&json={}",
+
+        // char.swf's island-data onLoad calls its dataReadyCallback only when answer is
+        // "ok" (with a parseable json) or "noIslandInfo" - the old ok=1&success=1 body
+        // was neither, so the character-restore path never signalled ready. Island data
+        // already persists in the client's own shared object here, so "no server-side
+        // info" is both the honest answer and the one that lets the load continue.
+        "get_island_info.php": "answer=noIslandInfo",
+
+        // Its onLoad parses islands_json only under answer=ok, and calls the callback
+        // either way. An empty object means this account has finished nothing.
+        "list_finished_islands.php": "answer=ok&islands_json={}"
+    };
+
+    const GENERIC = "ok=1&success=1";
+
+    // These names belong to sw.js, which answers them from IndexedDB: the account
+    // routes are the local account backend and track.php is its telemetry route.
+    // Shadowing one here would break sign-in or persistence, so they are the only
+    // .php paths that must reach the worker.
+    const WORKER_OWNS = {
+        "login.php": 1,
+        "part-register.php": 1,
+        "register.php": 1,
+        "reguser.php": 1,
+        "status.php": 1,
+        "track.php": 1,
+        "__pop_accounts.php": 1,
+        "__pop_import_accounts.php": 1,
+        "__pop_delete_account.php": 1,
+        "__pop_set_char.php": 1
+    };
+
+    function answer(body) {
+        return Promise.resolve(new Response(body, {
+            status: 200,
+            headers: { "Content-Type": "text/plain; charset=utf-8" }
+        }));
+    }
+
+    const realFetch = window.fetch.bind(window);
+
+    const folder = location.pathname.replace(/[^/]*$/, "");
+
+    // Directories that exist only inside this folder. A client that has lost its base
+    // asks for "/framework/data/config.xml"; the file it wants is "<folder>framework/...".
+    const GAME_DIRS = ["avatarParts", "brain", "comics", "creatorClips", "externalAssets",
+                       "flashpoint", "framework", "games", "images", "items", "photos",
+                       "popups", "ratings", "scenes", "video"];
+
+    // Root-level files the client builds as prefix + "/" + name. The framework starts a
+    // movie that way from its startup_path flashvar, so an empty prefix asks the origin
+    // for "/gameplay.swf" instead of the copy beside the page. Only these extensions
+    // are rebased, so an unrelated site-root request is never pulled into the folder.
+    const GAME_FILE = /\.(swf|xml|txt|json|htm|html)$/i;
+
+    function phpBody(pathname) {
+        const name = pathname.split("/").pop();
+
+        // time.php's reply carries no key: sendAndLoad reads the parameter NAME as the
+        // timestamp ("for(_loc1_ in receiver) islandTimes[island].end = _loc1_"), so a
+        // named flag like ok=1 becomes a bogus clock reading.
+        if (name === "time.php") return Math.floor(Date.now() / 1000) + "=";
+
+        return Object.prototype.hasOwnProperty.call(ANSWERS, name) ? ANSWERS[name] : GENERIC;
+    }
+
+    // Null unless the path really is game content, so a genuine site-root asset is
+    // never redirected by accident.
+    function rebase(pathname) {
+        if (folder.length <= 1 || pathname.indexOf(folder) === 0) return null;
+
+        const rel = pathname.replace(/^\/+/, ""),
+              slash = rel.indexOf("/"),
+              first = slash === -1 ? rel : rel.slice(0, slash);
+
+        // A bare file: "/gameplay.swf", "/char.swf", "/home.htm".
+        if (slash === -1) return GAME_FILE.test(first) ? folder + rel : null;
+
+        return GAME_DIRS.indexOf(first) === -1 ? null : folder + rel;
+    }
+
+    /*
+       A room owned by the multiuser service has no island of its own on a static host,
+       so the client asks for "scenes/islandundefined/sceneHotelInterior.swf" and Ruffle
+       reports a failed movie load. Those rooms ship with one of the island folders, and
+       the table below says which, so the path can be repaired instead of dropped.
+       Regenerate it with: node tools/scene-map.js --write
+    */
+    let activeIsland = "";
+
+    window.popSetIsland = function (island) {
+        const name = String(island || "");
+        activeIsland = name === "Home" ? "" : name;
+    };
+
+    /* === SCENE MAP (generated by tools/scene-map.js - do not edit by hand) === */
+    const SCENE_MAP =
+        "AdGroundH|Early;AdGroundH10|Steam;AdGroundH11|Peanuts;AdGroundH12|Cryptid;AdGroundH13|Wimpy;" +
+        "AdGroundH14|Japan;AdGroundH15|Shrink;AdGroundH16|Train;AdGroundH17|GameShow;AdGroundH18|Ghost;" +
+        "AdGroundH19|Shipwreck;AdGroundH2|Shark;AdGroundH20|Vampire;AdGroundH21|Woodland;" +
+        "AdGroundH22|Tribal;AdGroundH23|Boardwalk;AdGroundH24|Moon;AdGroundH25|Villain;" +
+        "AdGroundH26|Charlie;AdGroundH27|Zombie;AdGroundH28|NightWatch;AdGroundH29|Backlot;" +
+        "AdGroundH3|Carrot;AdGroundH30|BigNate;AdGroundH31|Japan;AdGroundH32|Myth;AdGroundH33|Spy;" +
+        "AdGroundH34|Super;AdGroundH35|Woodland;AdGroundH36|Vampire;AdGroundH37|Trade;AdGroundH38|Wimpy;" +
+        "AdGroundH39|Wimpy;AdGroundH4|Super;AdGroundH40|Astro;AdGroundH42|Moon;AdGroundH43|Shark;" +
+        "AdGroundH44|Vampire;AdGroundH46|NightWatch;AdGroundH48|Woodland;AdGroundH49|Villain;" +
+        "AdGroundH5|Spy;AdGroundH50|Trade;AdGroundH51|LegendarySwords;AdGroundH52|BigNate;" +
+        "AdGroundH53|Haunted;AdGroundH6|BigNate;AdGroundH7|Astro;AdGroundH8|Counter;AdGroundH9|Myth;" +
+        "AdSkyH|Early;AdUnderH|Early;AdUnderH2|Shark;Airlines|Nabooti;AlienBase|Moon;AlienEntrance|Moon;" +
+        "AncientTunnel|Counter;AnthonyCabin|Train;ApartmentNormal|Shrink;Apollo|Myth;" +
+        "Arcade|Boardwalk,Early;Archery|Tribal;Armory|Vampire;Asteroid|Astro;AstroMain|Astro;" +
+        "Astrozone1|Astro;Astrozone2|Astro;Attic|Spy,Vampire;AvenueA|Shrink;Aztec|Time;" +
+        "BacklotCommon|Backlot;BacklotMain|Backlot;BacklotTopdown|Backlot;Backroom|NightWatch;" +
+        "BaguetteInn|Counter;Balance|Early,Reality;BallroomS2|Shipwreck;BallroomS3|Shipwreck;" +
+        "BallroomS4|Shipwreck;BallroomS5|Shipwreck;BallroomS6|Shipwreck;Bank|Ghost,Super;" +
+        "BankBasement|Ghost;Barracks|Moon;BashoExterior|Japan;BashoInterior|Japan;Bathroom|Train;" +
+        "Bathroom1|Super;Bathroom2|Super;BathroomNormal|Shrink;BathroomShrunk01|Shrink;" +
+        "BathroomShrunk02|Shrink;BattleMap|Trade;Beach|Boardwalk;BedroomShrunk01|Shrink;" +
+        "BedroomShrunk02|Shrink;BigNateMain|BigNate;BigfootCave|Cryptid;Billiards|Reality;" +
+        "BinaryBard1|Villain;BinaryBard2|Villain;BinaryBard3|Villain;BingoHall|Wimpy;BioDome|Moon;" +
+        "BioDome2|Moon;BioluminescentBog|Woodland;Bistro|Spy;BlackWidow|Villain;" +
+        "BoardwalkCommon|Boardwalk;BoardwalkMain|Boardwalk;BoardwalkStore|Boardwalk;Boat|Ghost;" +
+        "BogDayTwo|Woodland;BonusQuest|Charlie;Booga|Shark;BoulderPush|Reality;Brainiacs|GameShow;" +
+        "BridgeS1|Shipwreck;BridgeS2|Shipwreck;BridgeS5|Shipwreck;BridgeS6|Shipwreck;BrokenBarrel|Trade;" +
+        "Brownstone|Zombie;BubblegumRoom|Charlie;BuenosAires|GameShow;BunkerFPS|Zombie;Cabin|Shipwreck;" +
+        "CanyonHideout|West;CaptainCrawfish|Villain;CaptainsRoom|Steam;CaptainsTower|Steam;" +
+        "CaribbeanInterior|Trade;CaribbeanPort|Trade;CarrotMain|Carrot;Carrots|Zombie;" +
+        "CasinoInterior|West;Castaway|Shark;Castle|Vampire;Castle1|Astro;Castle2|Astro;Castle3|Astro;" +
+        "Castle4|Astro;Castle5|Astro;Castle6|Astro;Castle7|Astro;CastleGrounds|Vampire;" +
+        "CastleTowers|Vampire;Catacombs|Ghost;Catch|Reality;Cathedral1|Astro;Cathedral2|Astro;" +
+        "Cave|Vampire;CaveContinued|LegendarySwords;CaveEntrance|LegendarySwords;Cavern|Woodland;" +
+        "Cerberus|Myth;CharlieCommon|Charlie;CharlieMain|Charlie;Cheese|BigNate;China|Time;" +
+        "ChinaInterior|Trade;ChinaPort|Trade;ChinaTown|Zombie;ChocolateRoom|Charlie;Cinema|Carrot;" +
+        "City|Early;City2|Early;CityChase|Charlie;CityDestroy|Backlot;Cliff|Vampire;CliffPark|Cryptid;" +
+        "Cliffs|LegendarySwords;Climber|Wimpy;ClockTower|West;ClothingStore|NightWatch;" +
+        "ClownStore|Counter;ClubExterior|Train;ClubInterior|Train;CoachCar|Train;CoalCar|Train;" +
+        "Cockpit|Moon;Coconut|Shark;CoffeeshopLeft|Backlot;CoffeeshopRight|Backlot;Coliseum|Tribal;" +
+        "Comic|Super;ComingSoon|NightWatch;Common|Early;Construction|Woodland;Control|Spy;" +
+        "ControlInterior|Spy;ConvenienceStore|Wimpy;CornerShop|Charlie;Costume|Super;" +
+        "CostumeStore|NightWatch;CottageExterior|Counter;CottageInterior|Counter;CounterDocks|Counter;" +
+        "CounterDowntown|Counter;CounterMain|Counter;Countryside|Peanuts;CountsChamber|Vampire;" +
+        "Courtyard|Charlie;CrawfishBottle|Villain;CronesHouseLower|Ghost;CronesHouseUpper|Ghost;" +
+        "Crop|Astro;CryptidCommon|Cryptid;CryptidMain|Cryptid;DahlStore|Charlie;Dark|Early;" +
+        "Desolation|Time;DetectionLab|Counter;DiamondPlains01|West;DiamondPlains02|West;" +
+        "DigitalDreamscapes|Backlot;Diner|Carrot;DiningCar|Train;Diving|Tribal;Docks|Spy;" +
+        "DocksInterior|Spy;DosCactos|West;DownTown|Super;DrHareBottom|Villain;DrHareMiddle|Villain;" +
+        "DrHareTop|Villain;DragonBattle|Japan;DryadDay2|Woodland;DryadHollow|Woodland;Edison|Time;" +
+        "Edison2|Time;EdisonCabin|Train;EdoEast|Japan;EdoWest|Japan;Electronics|NightWatch;" +
+        "Elevator|Villain;Engine|Carrot;EngineRoomS3|Shipwreck;EngineRoomS4|Shipwreck;" +
+        "EngineRoomS5|Shipwreck;EngineRoomS6|Shipwreck;Engravers|Ghost;Everest|Time;Everest2|Time;" +
+        "Everest3|Time;ExternalPostProduction|Backlot;ExternalSoundstage1|Backlot;" +
+        "ExternalSoundstage2|Backlot;ExternalSoundstage3|Backlot;ExternalSoundstage4|Backlot;" +
+        "ExtraCabin|Train;Factory|Carrot,GameShow;FactoryInterior|GameShow;Farm|Carrot;FarmHouse|Carrot;" +
+        "Farmhouse|Peanuts;FerrisWheel|Train;FinalBattle|Woodland;FinalBoss|LegendarySwords;" +
+        "Financial|Zombie;Fire1|Astro;Fire2|Astro;Fire3|Astro;Fishing|Reality;FoggyForest|Ghost;" +
+        "ForestCanopy|Woodland;Fortress1|Japan;Fortress2|Japan;Fortress3|Japan;Fortress4|Japan;" +
+        "FortressClimb|Japan;FortressDoorway|Japan;France|Time;France2|Time;Freezer|Carrot,Shipwreck;" +
+        "FreightCar|Train;FruitContainer|Zombie;FudgeRoom|Charlie;FunHouseInterior|Boardwalk;Future|Time;" +
+        "Future2|Time;GadgetStore|NightWatch;Gallery1|Counter;Gallery2|Counter;GalleyS4|Shipwreck;" +
+        "GalleyS5|Shipwreck;GalleyS6|Shipwreck;GameShowCommon|GameShow;GameShowMain|GameShow;" +
+        "GamerApartment|Zombie;Garage|Wimpy;Garden|Early;GardenHut|Japan;GatedForest|Cryptid;" +
+        "GatedMansions|Cryptid;GeneralStore|Cryptid;Geyser|Reality;GhostCommon|Ghost;" +
+        "GhostDwellings|Ghost;GhostMain|Ghost;GhostPrisonExterior|Ghost;GhostPrisonHallway|Ghost;" +
+        "Giant|Early;GiftStore|NightWatch;GingerHouse|Ghost;GoblinChase|Woodland;" +
+        "GoblinChaseComplete|Woodland;GoblinChaseDay2|Woodland;Governor|Trade;Graff|Time;Graff2|Time;" +
+        "GrammasHouse|Wimpy;GrammasStreet|Wimpy;GrandpasApartment|Wimpy;GraveLotA|Ghost;GraveLotB|Ghost;" +
+        "Graveyard|Early;GreatBridge|Japan;GreatHall|Vampire;Greece|Time;Greece2|Time;" +
+        "Greenhouse|Spy,Steam;GregsHouse|Wimpy;Grove|Myth;GuardRoom|Counter;HadesPit1|Myth;" +
+        "HadesPit2|Myth;HadesTemple|Myth;HadesThrone|Myth;HairClub|Spy;Hallway|Villain;" +
+        "HallwayCloset|Counter;HallwayS1|Shipwreck;HallwayS2|Shipwreck;HallwayS3|Shipwreck;" +
+        "HallwayS4|Shipwreck;HallwayS5|Shipwreck;HallwayS6|Shipwreck;HangGlider|Reality;Haunted1|Haunted;" +
+        "Haunted2|Haunted;Haunted3|Haunted;Haunted4|Haunted;Headquarters|Spy;HedgeMaze|Ghost;" +
+        "HelicopterChase|Cryptid;HelicopterMap|Cryptid;HelicopterRide|Villain;HemlockInn|Ghost;" +
+        "HercsHut|Myth;Hibernation1|Steam;Hibernation2|Steam;Hideout|Astro;HimalayaCamp|Cryptid;" +
+        "HimalayaClimb|Cryptid;HimalayaTemple|Cryptid;Home|Home;HotelInterior|West;HoudiniCabin|Train;" +
+        "HubGuts|Steam;Hurdles|Tribal;Hydra|Myth;Ice1|Astro;Ice2|Astro;Ice3|Astro;Icebergs|Shipwreck;" +
+        "ImperialGarden|Japan;Infirmary|Moon;InnerSanctum|Japan;InterrogationRoom|Counter;" +
+        "InventingRoom|Charlie;Istanbul|GameShow;Jacksbackyard|Japan;JailCell|Japan;Jamestown|Early;" +
+        "JapanMain|Japan;Jars|Reality;Javelin|Tribal;JazzCafe|Counter;JeepMap|Cryptid;" +
+        "JuicingRoom|Charlie;Jungle1|Astro;Jungle2|Astro;Junkyard|Super;KaraokeBar|Zombie;Kaya|Nabooti;" +
+        "KerplunkC1|GameShow;KerplunkC2|GameShow;KerplunkC3|GameShow;KirkTrailer|Backlot;" +
+        "KirkTrailerInterior|Backlot;KitchenShrunk01|Shrink;KitchenShrunk02|Shrink;KiteStore|Cryptid;" +
+        "Knockout|Reality;Komix|BigNate;Lab|Time;Laboratory|Vampire;Labyrinth|Myth;LabyrinthRoom|Myth;" +
+        "LabyrinthSnake|Myth;Lair01|GameShow;Lair02|GameShow;Lair03|GameShow;Lair04|GameShow;" +
+        "LandPrototypeAS2|Demo;Landing|LegendarySwords;LandingSite|Moon;Laundromat|Wimpy;" +
+        "LeMondeCabin|Train;Leftside|Boardwalk;LeisureHallways|Wimpy;LeisureLobby|Wimpy;" +
+        "LeisureTowers|Wimpy;Lewis|Time;LibraryCommon|Japan;LighthouseExterior|Ghost;" +
+        "LighthouseInterior|Ghost;LivingQuarters|Steam;LivingRoomShrunk|Shrink;Loading|Carrot;" +
+        "LochBarExterior|Cryptid;LochBarInterior|Cryptid;LochCastle|Cryptid;LochCoveNessie|Cryptid;" +
+        "LochRocksIslands|Cryptid;LongJump|Tribal;LuggageCar|Train;MainHall|Counter;Mainstreet|Shark;" +
+        "Mali|Time;Mali2|Time;MallLeft|NightWatch;MallMiddle|NightWatch;MallRight|NightWatch;" +
+        "ManagersOffice|NightWatch;MannysRoom|Wimpy;Mansion|Spy;MansionBedroom|Cryptid;" +
+        "MansionExterior|Cryptid;MansionFoyer|Cryptid;MansionMuseum|Cryptid;MarshalsOffice|West;" +
+        "Mattress|NightWatch;Mausoleum|Vampire;MazeEnd|Charlie;MazeLoop|Charlie;MazeStart|Charlie;" +
+        "Medicine|Shark;MemorabiliaStore|NightWatch;Miami|GameShow;MidasGym|Myth;MidwayLeft|Train;" +
+        "MidwayRight|Train;MikesMarket|Reality;Mill1|Astro;Mill2|Astro;Mine01|West;Mine02|West;" +
+        "Mine03|West;Mine1|Nabooti;Mine2|Nabooti;Mine3|Nabooti;Mine4|Nabooti;Mine5|Nabooti;MineCart|West;" +
+        "MineRide|Nabooti;MiniBoss|LegendarySwords;MissInterior|Moon;MissionControlExt|Moon;" +
+        "Monet|Villain;MoonCommon|Moon;MoonMain|Moon;Moped|Counter;Mordred|Astro;MoroccanInterior|Trade;" +
+        "MoroccanPort|Trade;Moscow|GameShow;MotelOffice|Reality;MotelRoom|Reality;MotorcycleMap|Cryptid;" +
+        "MountOlympus1|Myth;MountOlympus2|Myth;MountOlympus3|Myth;Mountain1|Nabooti;Mountain2|Nabooti;" +
+        "Mtfuji|Japan;Museum|Early;Museum2|Shark;MuseumInterior|GameShow;MythMain|Myth;" +
+        "NabootiMain|Nabooti;NabootiMuseum|Nabooti;NabootiStore|Nabooti;News|Super;" +
+        "NewspaperBasement|Ghost;NewspaperOffice|Ghost;NightClub|GameShow;NightWatchCommon|NightWatch;" +
+        "NightWatchMain|NightWatch;Nile1|Nabooti;Nile2|Nabooti;NinjaTraining|Japan;NutRoom|Charlie;" +
+        "Obelisk|Moon;Obelisk02|Moon;Obelisk03|Moon;Obelisk04|Moon;Ocean|Villain;OilControlRoom|Villain;" +
+        "OlympusMuseum|Myth;Order|Astro;OrleansInterior|Trade;OrleansPort|Trade;OutpostInterior|Trade;" +
+        "OutpostPort|Trade;OutsideCave|LegendarySwords;Oyster|BigNate;PRBoltCutterFarm|Cryptid;" +
+        "PRBrotherFarm|Cryptid;PRDustyFarm|Cryptid;PROutcrop|Cryptid;PRSpottedGoatFarm|Cryptid;" +
+        "Parachute|Villain;Park|Super;ParkingLot|NightWatch;Party|Time;PeanutsCommon|Peanuts;" +
+        "PeanutsHouse|Peanuts;PeanutsMain|Peanuts;PeanutsParty|Peanuts;PeanutsPumpkins|Peanuts;" +
+        "PeanutsStore|Peanuts;PeanutsYard|Peanuts;PetStore|NightWatch;Picasso|Villain;PinkertonCar|Train;" +
+        "Pit|Early;Planetarium|Astro;Playground|BigNate;PlaygroundHut|BigNate;PoleClimb|Reality;" +
+        "PoleVault|Tribal;PoliceStation|Counter;PortersCloset|Train;PoseidonBeach|Myth;" +
+        "PoseidonTemple|Myth;PoseidonThrone|Myth;PoseidonWater|Myth;PostProduction|Backlot;Present|Time;" +
+        "PresidentialCar|Train;PrintShop|NightWatch;PrisonCellTunnel|Ghost;PrisonExterior|Villain;" +
+        "PrisonGuardRoom|Villain;PrisonLab|Villain;PrisonLabDamaged|Villain;PrisonTunnel|Ghost;" +
+        "Processing|Carrot;Promo|Train;PuddyApartment|Zombie;Puffin|BigNate;PumpkinPush|Peanuts;" +
+        "Pyramid1|Nabooti;Pyramid2|Nabooti;Pyramid3|Nabooti;Pyramid4|Nabooti;RLvehicleBay|Moon;" +
+        "Race|Reality;RandomForest|Cryptid;Reality|Reality;RealityMain|Reality;Renaissance|Time;" +
+        "Renaissance2|Time;ResearchLab|Moon;Restroom|Cryptid;RiverChase|Charlie;Robot|Carrot;" +
+        "RockLab|Moon;RockRidge|West;RocketFire|Astro;RocketHome|Astro;RocketIce|Astro;" +
+        "RocketJungle|Astro;RocketMoon|Astro;RocketRepair|Moon;RocketSword|Astro;" +
+        "RockyTerrain|LegendarySwords;RodricksRoom|Wimpy;RomeroApartment|Zombie;RomerosBunker|Zombie;" +
+        "Rooftops|Train;Room2B|Ghost;Rover|Moon;RowleysHouse|Wimpy;RubysSaloon|West;Ruins|Shark;" +
+        "SFRStudio|GameShow;SacredTree|Woodland;Safari1|Nabooti;Safari2|Nabooti;Saltys|BigNate;" +
+        "Satellite|Spy;ScaredyPants1|GameShow;ScaredyPants2|GameShow;ScaredyPants3|GameShow;" +
+        "ScaredyPantsIntro|GameShow;School1|BigNate;School2|BigNate;School3|BigNate;School4|BigNate;" +
+        "School5|BigNate;SchoolCafetorium|Shrink;SchoolExterior|Wimpy;SchoolInterior|Shrink,Wimpy;" +
+        "ScreeningRoom|Backlot;SeaFloor|Shipwreck;Seal|BigNate;SecondMausoleum|Vampire;" +
+        "SecurityOffice|Counter,NightWatch;Sewer|Carrot;Sewer1|Super;Sewer2|Super;SewerDay2|Zombie;" +
+        "ShadyPines|Moon;ShadySide|Zombie;ShipwreckCommon|Shipwreck;ShipwreckMain|Shipwreck;" +
+        "Shoppe|BigNate;ShotPut|Reality;Shotput|Tribal;ShrinkCommon|Shrink;ShrinkMain|Shrink;" +
+        "ShroudAttic|Cryptid;ShroudExterior|Cryptid;ShroudInterior|Cryptid;Shuffle|Reality;" +
+        "SilvaOfficeShrunk01|Shrink;SilvaOfficeShrunk02|Shrink;Skyscraper|Super;Sledding|Wimpy;" +
+        "Smelter|Carrot;SmoothieShop|Zombie;Soundstage1|Backlot;Soundstage2|Backlot;Soundstage3|Backlot;" +
+        "Soundstage3Chase|Backlot;Soundstage4|Backlot;Sphinx|Myth;SpiderForest|LegendarySwords;" +
+        "SportsStore|NightWatch;SpyMain|Spy;SpyTowers1|Spy;SpyTowers2|Spy;Spyglass|Spy;Station|Super;" +
+        "StatueRoom|Counter;SteamAlly|Steam;SteamBoss|Steam;SteamCloset|Steam;SteamCommon|Steam;" +
+        "SteamFactory|Steam;SteamGarage|Steam;SteamHub|Steam;SteamMain|Steam;SteamMuseum|Steam;" +
+        "SteamOffice|Steam;SteamProduction|Steam;SteamShop|Steam;SteamStorage|Steam;SteamTunnels|Steam;" +
+        "StorageRoom|GameShow;Styx|Myth;Subway|Super,Zombie;SubwayBunker|Zombie;SubwayFinancial|Zombie;" +
+        "SubwayInterior|Zombie;SubwayWharf|Zombie;SumoArena|Japan;SunriseStreet|Backlot;SuperMain|Super;" +
+        "Surf|Cryptid;Surplus|Carrot;SurreyStreet|Wimpy;SurvivalistsBunker|Zombie;TVRoom|Charlie;" +
+        "TVWorld|Reality;Talent|Backlot;TanningSalon|NightWatch;Temple1|Shark;Temple2|Shark;" +
+        "Temple3|Shark;TempleInterior|Cryptid;Tenements|Charlie;TeslaCabin|Train;ThunderVolt|Boardwalk;" +
+        "Tokyo|GameShow;Toss|Reality;TotemHop|Reality;Townhall|Shark;ToyStore|NightWatch;TradeMain|Trade;" +
+        "TradeMain2|Trade;TradeStore|Trade;TradingPost|West;TrainMain|Train;TrainStop|Train;" +
+        "TrashCan|Shrink;TrashRoom|Charlie;TreasurePort|Trade;TreeBottom|Myth;TreeClimb|Woodland;" +
+        "TreeTop|Myth;Treehouse|Japan;TreehouseStore|Japan;TribalCommon|Tribal;TribalMain|Tribal;" +
+        "TrickOrTreat|Peanuts;TripleJump|Tribal;TrollHills|Woodland;Tunnel|Woodland;Turnpike|Cryptid;" +
+        "TwainCabin|Train;UnderBoardwalk|Boardwalk;UnderwaterCherryBase|Cryptid;VIPCar01|Train;" +
+        "VIPCar02|Train;VampireCommon|Vampire;VampireMain|Vampire;VanGogh|Villain;VehicleBay|Moon;" +
+        "Vent|Carrot,NightWatch;Viking|Time;Viking2|Time;VillainCommon|Villain;VillainMain|Villain;" +
+        "Vines|Woodland;Vines2|Woodland;WCStation|Train;WardensOffice|Ghost;WebCafe|Counter;" +
+        "WeightLift|Tribal;WestMain|West;WestMap|West;Wharf|Zombie;WhirleyStreet|Wimpy;WimpyCommon|Wimpy;" +
+        "WimpyMain|Wimpy;WimpyStore|Wimpy;WoodlandCommon|Woodland;WoodlandMain|Woodland;Woods|Japan;" +
+        "Wrestling|Tribal;YoshiGameShow|GameShow;YoshiTask3|GameShow;ZacksRoom|Steam;" +
+        "ZeusBattleNY|Villain;ZeusDay2_1|Villain;ZeusDay2_2|Villain;ZeusDay2_3|Villain;" +
+        "ZombieCommon|Zombie;ZombieMain|Zombie;ZombieTunnel|Zombie;immunityInterface|Reality;" +
+        "playerHUD|LegendarySwords;smartPhone|NightWatch;toolsTray|Demo;tradeInterface|Trade;" +
+        "vendorCart|Steam;";
+    /* === end SCENE MAP === */
+
+    let sceneMap = null;
+
+    function islandsFor(scene) {
+        if (sceneMap === null) {
+            sceneMap = {};
+
+            SCENE_MAP.split(";").forEach(function (row) {
+                const parts = row.split("|");
+
+                if (parts.length === 2 && parts[0]) sceneMap[parts[0]] = parts[1].split(",");
+            });
+        }
+
+        return sceneMap[scene] || [];
+    }
+
+    function repairScene(pathname) {
+        if (pathname.indexOf("islandundefined") === -1) return null;
+
+        const file = pathname.split("/").pop().replace(/\.swf$/i, ""),
+              scene = file.indexOf("scene") === 0 ? file.slice(5) : file,
+              owners = islandsFor(scene),
+
+              // The running island wins when it ships the scene; otherwise the only
+              // island that has it. Anything ambiguous is left alone rather than
+              // guessed, so a genuine 404 still looks like one.
+              island = owners.indexOf(activeIsland) > -1 ? activeIsland
+                     : owners.length === 1 ? owners[0] : "";
+
+        if (!island) return null;
+
+        return pathname.replace("islandundefined", "island" + island);
+    }
+
+    window.fetch = function (input, init) {
+        try {
+            const raw = typeof input === "string" ? input : (input && input.url) || "",
+                  url = new URL(raw, location.href);
+
+            if (url.origin === location.origin) {
+                // A static host can only answer a .php call with 501/405 - there is
+                // nothing it could run. Answer here instead, except for the routes
+                // sw.js implements. The test is the route name rather than the folder:
+                // getPrefix answers "", so the client resolves paths like
+                // "photos//get_scene_photos.php" against the mirror itself, inside the
+                // folder where sw.js has no route for them.
+                if (/\.php$/i.test(url.pathname)) {
+                    if (WORKER_OWNS[url.pathname.split("/").pop()] !== 1)
+                        return answer(phpBody(url.pathname));
+                } else {
+                    let target = rebase(url.pathname) || url.pathname;
+                    target = repairScene(target) || target;
+
+                    // Keep the query: those island links carry ?island=...&room=...
+                    if (target !== url.pathname) return realFetch(target + url.search, init);
+                }
+            }
+        } catch (err) { }
+
+        return realFetch(input, init);
+    };
+
+    // Ruffle's LoadVars and its asset loader use XMLHttpRequest, which the patch above
+    // never sees. That is how a live page asked the site root for
+    // framework/data/config.xml: getPrefix.php went out by XHR, the static host answered
+    // 405, the client fell back to a root base, and every relative asset 404'd. Answering
+    // at the object level makes the page right whether or not a worker controls it yet.
+    const RealXHR = window.XMLHttpRequest;
+
+    if (RealXHR) {
+        const realOpen = RealXHR.prototype.open,
+              realSend = RealXHR.prototype.send;
+
+        RealXHR.prototype.open = function (method, url) {
+            const args = Array.prototype.slice.call(arguments);
+
+            try {
+                const abs = new URL(String(url), location.href);
+
+                if (abs.origin === location.origin) {
+                    delete this.__popBody;
+
+                    if (/\.php$/i.test(abs.pathname) && WORKER_OWNS[abs.pathname.split("/").pop()] !== 1) {
+                        // Opened but never sent: send() below answers it in place.
+                        this.__popBody = phpBody(abs.pathname);
+                        args[1] = abs.href;
+                    } else if (!/\.php$/i.test(abs.pathname)) {
+                        let target = rebase(abs.pathname) || abs.pathname;
+                        target = repairScene(target) || target;
+
+                        if (target !== abs.pathname) args[1] = target + abs.search;   // keep ?island=...&room=...
+                    }
+                }
+            } catch (err) { }
+
+            return realOpen.apply(this, args);
+        };
+
+        RealXHR.prototype.send = function () {
+            if (this.__popBody === undefined)
+                return realSend.apply(this, arguments);
+
+            const xhr = this,
+                  text = this.__popBody,
+                  type = this.responseType;
+
+            setTimeout(function () {
+                const fix = function (key, value) {
+                    Object.defineProperty(xhr, key, { configurable: true, get: function () { return value; } });
+                };
+
+                fix("readyState", 4);
+                fix("status", 200);
+                fix("statusText", "OK");
+
+                if (type === "arraybuffer") {
+                    fix("responseText", "");
+                    fix("response", new TextEncoder().encode(text).buffer);
+                } else if (type === "json") {
+                    let parsed = null;
+                    try { parsed = JSON.parse(text); } catch (err) { }
+                    fix("responseText", text);
+                    fix("response", parsed);
+                } else {
+                    fix("responseText", text);
+                    fix("response", text);
+                }
+
+                const fire = function (kind) {
+                    let event;
+                    try { event = new Event(kind); } catch (err) { event = { type: kind }; }
+
+                    try { xhr.dispatchEvent(event); } catch (err) { }
+
+                    const inline = xhr["on" + kind];
+                    if (typeof inline === "function") inline.call(xhr, event);
+                };
+
+                fire("readystatechange");
+                fire("load");
+                fire("loadend");
+            }, 0);
+        };
+    }
+})();
+
+// Local accounts: sw.js answers login.php / part-register.php / register.php from
+// this browser's IndexedDB, so accounts work on a static host. Scoped to this
+// folder, so it never touches anything else on the origin.
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js", { scope: "./" }).then(function (reg) {
+        console.log("[pop] local account backend ready for", reg.scope);
+
+        // A page is not controlled until the worker activates, so a load that registers
+        // it can still reach the static host and 404. Tell the panel once it takes over,
+        // so the account list fills in without asking for another reload.
+        return navigator.serviceWorker.ready;
+    }).then(function () {
+        window.dispatchEvent(new Event("pop-sw-ready"));
+    }, function (err) {
+        console.warn("[pop] local account backend unavailable:", err && err.message);
+    });
+
+    navigator.serviceWorker.addEventListener("controllerchange", function () {
+        window.dispatchEvent(new Event("pop-sw-ready"));
+    });
+}
+
+let game = null,       // the main stage embed
+    menu = null;       // the 58px save-data toolbar that Home shows
+
+const stage = document.createElement("div");
+stage.id = "stage";
+document.body.appendChild(stage);
+
+const stageSize = { w: 0, h: 0, menu: 0 }; // natural size of the current stage
+
+function main() {
+    // A rename asked for in the accounts panel is applied here, before Ruffle starts.
+    // Writing it while the SWF is alive does not stick, because the player flushes its
+    // own copy of every shared object over the top when the page unloads.
+    if (typeof window.popApplyPendingLogin === "function") window.popApplyPendingLogin();
+    if (typeof window.popRestoreLook === "function") window.popRestoreLook();
+    if (typeof window.popEnsureLook === "function") window.popEnsureLook();
+    if (typeof window.popEnsureIdentity === "function") window.popEnsureIdentity();
+    if (typeof window.popSeedFirstRun === "function") window.popSeedFirstRun();
+
+    // Those rewrote the character save after the panel first drew it.
+    if (typeof window.popRefreshPanel === "function") window.popRefreshPanel();
+
+    const params = getInput();
+
+    // Rooms the multiuser service would normally identify can only be resolved against
+    // the island this page is running, so publish it before any player boots.
+    window.popSetIsland(params.island);
+
+    // First run: no character save exists, so route through createUser.swf the way the
+    // curation's menu does when "new user" is pressed (it sets "ready" and reloads).
+    // The flag is only consulted for non-Home scenes, so the reload has to name a
+    // concrete scene; otherwise the client boots into the island with no user and
+    // raises "game data has been lost" on top of Home, which is what makes that
+    // dialog's "back to home page" button look like a plain refresh.
+    // Reusing the island that was asked for keeps a deep link (e.g. the travel map's
+    // "home.htm?island=Villain") pointing at that island instead of forcing Early.
+    // The "fresh" marker makes the redirect single-shot: without it a profile with no
+    // character reloads into this branch forever and never reaches createUser.swf.
+    if (!hasCharacter() && params.fresh !== "1") {
+        const seeded = typeof window.popSeedCharacter === "function" && window.popSeedCharacter("player");
+
+        // Falling back to the creator route only if the save could not be written.
+        if (!seeded) {
+            setCookieFlag(COOKIE_NEW_USER, true);
+
+            const freshIsland = params.island === "Home" ? "Early" : params.island,
+                  freshRoom = params.island === "Home" ? "City2" : params.room;
+
+            location.replace(PAGE_BASE + "?island=" + encodeURIComponent(freshIsland) +
+                "&room=" + encodeURIComponent(freshRoom) + "&startup_path=" + PATH_DEFAULT + "&fresh=1");
+            return;
+        }
+    }
+
+    flashpointLoad(params.island, params.room, params.startup_path);
+}
+
+function makeEmbed(id, src, width, height, flashvars) {
+    const el = document.createElement("embed");
+    el.id = id;
+    el.setAttribute("src", src);
+    el.setAttribute("type", "application/x-shockwave-flash");
+    el.setAttribute("width", width);
+    el.setAttribute("height", height);
+    el.setAttribute("scale", "noscale");
+    el.setAttribute("wmode", "opaque");
+    el.setAttribute("menu", "false");
+    el.setAttribute("bgcolor", "139ffd");
+    if (flashvars) el.setAttribute("flashvars", flashvars);
+    // Positioned by the #stage wrapper, which scales the whole thing to fit.
+    el.style.left = "0px";
+    el.style.top = "0px";
+    return el;
+}
+
+/*
+   Ruffle's polyfill swaps the <embed> this page appends for a <ruffle-embed> as soon
+   as the player boots, so the node held in game/menu is detached almost immediately.
+   Anything set on that stale node is lost: inline styles (which left the save-data
+   toolbar lying at 0,0 underneath the stage) and the ExternalInterface callbacks the
+   SWFs publish, which is what made "Returning Player" throw "menu.returnUser is not
+   a function". Resolve the live element - the replacement keeps the same id - 
+   instead of trusting the stored reference.
+*/
+function liveMount(el) {
+    if (!el) return null;
+    if (el.isConnected) return el;
+    return (el.id && document.getElementById(el.id)) || null;
+}
+
+// The replacement only exists after polyfilling, so position once now and once after
+// the player has had a frame to appear.
+function placeMounts() {
+    function apply() {
+        const g = liveMount(game), m = liveMount(menu);
+
+        if (g) {
+            g.style.left = "0px";
+            g.style.top = "0px";
+        }
+
+        if (m) {
+            m.style.left = "0px";
+            m.style.top = `${ stageSize.h }px`;  // sits directly under the stage
+            m.removeAttribute("hidden");
+        }
+    }
+
+    apply();
+    requestAnimationFrame(apply);
+}
+
+function mountGame(src, width, height, flashvars) {
+    const fresh = makeEmbed("game", src, width, height, flashvars),
+          prev = liveMount(game);
+
+    if (prev) prev.replaceWith(fresh);
+    else stage.appendChild(fresh);
+    game = fresh;
+    stageSize.w = width;
+    stageSize.h = height;
+    fitStage();
+    placeMounts();
+}
+
+function mountMenu(src, width, height, flashvars) {
+    const fresh = makeEmbed("game-menu", src, width, height, flashvars),
+          prev = liveMount(menu);
+
+    if (prev) prev.replaceWith(fresh);
+    else stage.appendChild(fresh);
+    menu = fresh;
+    stageSize.menu = height;
+    fitStage();
+    placeMounts();
+}
+
+/*
+    A 1010x645 island stage does not fit a narrow window, and a cropped stage puts the
+    right-hand HUD out of reach. Scale the stage (and the toolbar under it) down until
+    it fits, keeping the aspect ratio. Ruffle maps pointer coordinates through
+    getBoundingClientRect, so clicks still land correctly under the transform.
+*/
+function fitStage() {
+    if (!stageSize.w || !stageSize.h) return;
+
+    const pad = 8,
+          withMenu = liveMount(menu) ? stageSize.menu : 0,
+          w = stageSize.w,
+          h = stageSize.h + withMenu;
+
+    // Fullscreen hands over the whole screen, so allow growth past native size there;
+    // windowed mode stays capped at 1:1. Either way the transform is safe for input:
+    // Ruffle hit-tests through getBoundingClientRect, so pointer mapping scales with it.
+    const cap = document.fullscreenElement ? 2 : 1;
+    const k = Math.min(cap, (innerWidth - pad) / w, (innerHeight - pad) / h);
+
+    stage.style.transform = `scale(${ k })`;
+    stage.style.left = `${ Math.max(0, (innerWidth - w * k) / 2) }px`;
+    stage.style.top = `${ Math.max(0, (innerHeight - h * k) / 2) }px`;
+}
+
+window.addEventListener("resize", fitStage);
+
+function flashpointLoad(island, scene, path = PATH_DEFAULT) {
+    let adScene = false,
+        pageState;
+
+    switch (scene) {
+        case SCENE_FP_RESTART:
+            pageState = STATE_FP_RESTART;
+            break;
+        case SCENE_FP_START:
+            pageState = STATE_FP_START;
+            break;
+        default:
+            if (scene.startsWith("Ad")) {
+                if (getAdStatus()) {
+                    pageState = STATE_SCENE;
+                    adScene = true;
+                } else {
+                    pageState = STATE_FP_AD;
+                }
+            } else if (getCookieFlag(COOKIE_NEW_USER, false)) {
+                pageState = STATE_FP_CREATE;
+                setCookieFlag(COOKIE_NEW_USER, false);
+            } else {
+                pageState = STATE_SCENE;
+
+                // Mostly detects "{island}Common" scenes, but also Early Poptropica's
+                // "Common" scene and Red Dragon Island's "LibraryCommon" scene.
+                if (!scene.endsWith("Common")) {
+                    const SPECIAL_COMMONS = [ "Coconut", "Party", "Cinema", "News", "HairClub", "Airlines",
+                                              "Saltys", "Crop", "BaguetteInn", "Billiards", "MidasGym",
+                                              "BrokenBarrel", "HotelInterior", "ClubInterior" ];
+
+                    // Wimpy Boardwalk Island has a normal scene named "Arcade".
+                    if (!(SPECIAL_COMMONS.includes(scene) || scene === "Arcade" && island === "Early")) {
+                        break;
+                    }
+                }
+
+                errorText.hidden = false;
+            }
+
+            break;
+    }
+
+    let width, height, gameState;
+
+    if (adScene) {
+        gameState = "return_user_advertisement_1";
+        width = 776;
+        height = 480;
+    } else if (scene === SCENE_FP_START) {
+        gameState = "init";
+        width = 800;
+        height = 480;
+    } else {
+        gameState = "return_user_standard";
+        width = 1010;
+        height = 645;
+    }
+
+    const flashVars = new URLSearchParams();
+    flashVars.set("desc", scene);
+    flashVars.set("island", island);
+    flashVars.set("startup_path", path);
+    flashVars.set("state", gameState);
+
+    if (getCharLazyLoadStatus())
+        flashVars.set("charLazyLoad", "1");
+
+    if (pageState === STATE_FP_START)
+        loadFPStart(SWF_STATES[pageState], width, height, flashVars.toString());
+    else {
+        if (pageState === STATE_SCENE)
+            sceneChange(island, scene);
+
+        mountGame(SWF_STATES[pageState], width, height, flashVars.toString());
+    }
+}
+
+function flashpointError(recoverable) {
+    if (recoverable)
+        location.reload();
+    else {
+        alert("A fatal error occurred.");
+        location.href = "index.html";
+    }
+}
+
+function getAdStatus() {
+    return getCookieFlag(COOKIE_ADS, false);
+}
+
+function getCharLazyLoadStatus() {
+    return getCookieFlag(COOKIE_CHARS, false);
+}
+
+function loadFPStart(extraMenuSrc, width, height, flashvars) {
+    mountMenu(extraMenuSrc, width, 58, flashvars);
+
+    window.flashpointLoad = function () {
+        // PopUtils.loadScene reaches this through ExternalInterface, so mount on a fresh
+        // task for the same reason as finalize: on a restart this replaces a live player
+        // and would destroy it while Ruffle still has its core locked.
+        setTimeout(function () {
+            mountGame(SWF_STATES[STATE_SCENE], width, height, flashvars);
+            placeMounts();
+            fitStage();
+        }, 0);
+    };
+
+    window.setInteractivity = function (enabled) {
+        const g = liveMount(game), m = liveMount(menu);
+
+        if (m) {
+            m.style.opacity = g ? g.style.opacity : null;
+            m.style.opacity = g ? g.style.opacity = enabled ? null : 0.6 : null;
+            m.style.pointerEvents = enabled ? null : "none";
+        }
+
+        if (g) g.style.pointerEvents = enabled ? null : "none";
+    };
+
+    window.loadTrackingPixel = function () {
+        setInteractivity(false);
+        // The toolbar is an AS3 shim; this asks it to start a brand new character.
+        const m = liveMount(menu);
+        if (m && typeof m.newUser === "function") m.newUser();
+    };
+
+    window.newUserAccept = function () {
+        setCookieFlag(COOKIE_NEW_USER, true);
+        finalize();
+    };
+
+    /*
+       ActionScript calls everything below, so Ruffle is still executing on the stack
+       while it runs. Removing a <ruffle-embed> at that moment destroys the instance
+       with its core borrowed, which logs "Unable to lock Ruffle core", then "Ruffle
+       instance destroyed", then "Unable to borrow Ruffle instance" for the rest of the
+       frame. Hand every teardown to a fresh task so the call can return first.
+    */
+    window.returnUser = function () {
+        // base.php detaches the stage here and lets the toolbar restore the save.
+        setTimeout(function () {
+            const g = liveMount(game);
+
+            if (g) g.remove();
+
+            setTimeout(function () {
+                const m = liveMount(menu);
+
+                if (m && typeof m.returnUser === "function") m.returnUser();
+            }, 1);
+        }, 0);
+    };
+
+    window.returnUserAccept = function () {
+        let island = "Early",
+            scene = "City2";
+        const lastScene = getLastScene();
+
+        if (lastScene) {
+            island = lastScene.island;
+            scene = lastScene.scene;
+        }
+
+        finalize();
+        POSTToBase(scene, island, PATH_DEFAULT);
+    };
+
+    window.newUserReject = window.returnUserReject = function () {
+        location.reload();
+    };
+
+    window.setAdStatus = function (enabled) {
+        return setCookieFlag(COOKIE_ADS, enabled);
+    };
+
+    window.setCharLazyLoadStatus = function (enabled) {
+        return setCookieFlag(COOKIE_CHARS, enabled);
+    };
+
+    let finalizing = false;
+
+    window.finalize = function () {
+        // Confirming a new character calls this from the toolbar's own click handler.
+        if (finalizing) return;
+        finalizing = true;
+
+        setTimeout(function () {
+            setInteractivity(true);
+
+            const m = liveMount(menu);
+            if (m) m.remove();
+            menu = null;
+            finalizing = false;
+        }, 0);
+    };
+}
+
+// Utilities
+
+/*
+   Changing islands navigates to home.htm, but the destination does not travel in the
+   URL: the client hands it over with a LocalConnection/POST transport that Ruffle does
+   not implement, so the page arrives bare and falls back to the Home menu. It does
+   trace its intent first - "exitRoomInternal() clipisle Villain, rootisle Home
+   desc : VillainMain,..." - so keep that in sessionStorage, which survives the
+   navigation, and pick it up as the destination on the next load.
+*/
+const PENDING_ISLAND = "pop.pendingIsland";
+const EXIT_TRACE = /exitRoomInternal\(\)\s+clipisle\s+(\w+),\s+rootisle\s+(\w+)\s+desc\s*:\s*(\w+)/;
+
+(function captureIslandExit() {
+    const rawLog = console.log;
+
+    console.log = function () {
+        try {
+            const match = EXIT_TRACE.exec(Array.prototype.join.call(arguments, " "));
+
+            // Only an island change matters here; staying put traces the same island.
+            if (match && match[1] !== match[2])
+                sessionStorage.setItem(PENDING_ISLAND, JSON.stringify({ island: match[1], room: match[3] }));
+        } catch (err) { }
+
+        return rawLog.apply(console, arguments);
+    };
+})();
+
+function getInput() {
+    const q = new URLSearchParams(location.search);
+    const obj = {};
+
+    obj.room = q.get("room");
+    obj.island = q.get("island");
+    obj.startup_path = q.get("startup_path");
+    obj.roomWasSet = !!obj.room;
+    obj.fresh = q.get("fresh");
+
+    let islandGiven = typeof obj.island === "string" && !!obj.island;
+    let pending = null;
+
+    // Read the breadcrumb once and forget it, whether or not this load uses it: a stale
+    // one must not hijack a later, deliberate return to the Home menu.
+    try {
+        pending = JSON.parse(sessionStorage.getItem(PENDING_ISLAND) || "null");
+        sessionStorage.removeItem(PENDING_ISLAND);
+    } catch (err) { }
+
+    if (!islandGiven && pending && typeof pending.island === "string" && pending.island) {
+        obj.island = pending.island;
+        if (typeof pending.room === "string" && pending.room) obj.room = pending.room;
+        obj.roomWasSet = true;
+        islandGiven = true;
+    }
+
+    /*
+        The travel map links to an island as "home.htm?island=Villain" with no room.
+        Every island's entry scene is named "<Island>Main" (VillainMain, SuperMain,
+        AstroMain...), so an empty room used to collapse to "Home" and drop the player
+        straight back on the menu. Only derive a room when an island was actually named.
+    */
+    if (typeof obj.room !== "string" || !obj.room)
+        obj.room = islandGiven && obj.island !== "Home" ? obj.island + "Main" : SCENE_FP_START;
+
+    if (typeof obj.island !== "string" || !obj.island)
+        obj.island = "Home";
+
+    if (typeof obj.startup_path !== "string" || !obj.startup_path)
+        obj.startup_path = PATH_DEFAULT;
+
+    return obj;
+}
+
+function hasCharacter() { // Ruffle stores SharedObjects in localStorage as "<host>//<name>"
+    try {
+        return Object.keys(localStorage).some(function (key) { return key.endsWith("//Char"); });
+    } catch (err) {
+        return true; // Don't force character creation if storage cannot be read.
+    }
+}
+
+function sceneChange(island, scene) {
+    try {
+        localStorage.setItem(lsKey, JSON.stringify({ island, scene }));
+    } catch (err) { }
+}
+
+function getLastScene() {
+    try {
+        const data = JSON.parse(localStorage.getItem(lsKey));
+
+        if (typeof data === "object" && data !== null && typeof data.island === "string" && typeof data.scene === "string")
+            return data;
+    } catch (err) { }
+
+    return null;
+}
+
+function getCookieFlag(name, defaultValue) { // Returns true if flag is ENABLED
+    const res = new RegExp(`(^|;)\\s*${ name }=(.)`, "").exec(document.cookie);
+    return res ? res[2] !== "0" : defaultValue;
+}
+
+function setCookieFlag(name, enabled) {
+    document.cookie = `${ name }=${ enabled ? "1" : "0" };expires=${ new Date(Date.now() + 315576000000) };path=/`;
+}
+
+// Game functions
+
+function dbug(message) {
+    console.log(message);
+}
+
+/*
+    base.php submits a form here; a static host cannot answer a POST, so the same
+    three arguments travel as a query string instead.
+*/
+function POSTToBase(room, island, startup_path) {
+    const params = new URLSearchParams();
+    params.set("room", room);
+    params.set("island", island);
+    params.set("startup_path", startup_path);
+    location.href = PAGE_BASE + "?" + params.toString();
+}
+
+// Debug helper: list what this browser has saved for the local accounts.
+window.popAccounts = function () {
+    return fetch("__pop_accounts.php").then(function (r) { return r.json(); });
+};
+
+/* On-page manager for the accounts sw.js keeps in IndexedDB, so they can be
+   inspected and removed without opening devtools. */
+(function () {
+    const btn = document.getElementById("accountsBtn"),
+          panel = document.getElementById("accountsPanel"),
+          list = document.getElementById("accountsList"),
+          save = document.getElementById("accountsSave"),
+          charBox = document.getElementById("accountsChar"),
+          exportBtn = document.getElementById("accountsExport"),
+          importBtn = document.getElementById("accountsImport"),
+          lookBtn = document.getElementById("accountsLook"),
+          fileInput = document.getElementById("accountsFile"),
+          note = document.getElementById("accountsNote"),
+          close = document.getElementById("accountsClose");
+
+    if (!btn || !panel || !list || !save || !charBox || !exportBtn || !importBtn || !fileInput || !note || !close) return;
+
+    function setNote(text, bad) {
+        note.textContent = text || "";
+        note.classList.toggle("bad", !!bad);
+    }
+
+    // The worker takes control a moment after the first load; fill the list in then.
+    window.addEventListener("pop-sw-ready", function () { refresh(); });
+
+    /*
+       Reads one shared object written by Ruffle: 2 byte magic, total length, "TCSO",
+       a version u16 and a zero u32, a u32 name length, the name, a u32 pad, then
+       u16-length keys with AMF0 values (a zero pad byte follows each value). Proved
+       byte-identical by re-serialising the stored "Char" object unchanged.
+    */
+    function parseLso(b64) {
+        const bin = atob(b64 || ""), n = bin.length;
+        const u8 = i => bin.charCodeAt(i);
+        const u16 = i => (u8(i) << 8) | u8(i + 1);
+        const u32 = i => ((u8(i) << 24) | (u8(i + 1) << 16) | (u8(i + 2) << 8) | u8(i + 3)) >>> 0;
+        const out = {};
+
+        let off = 14;
+        const nameLen = u32(off); off += 4 + nameLen + 4;
+
+        while (off + 2 < n) {
+            const kl = u16(off); off += 2;
+            const key = bin.substr(off, kl); off += kl;
+            const t = u8(off);
+
+            if (t === 0) {
+                const bytes = new Uint8Array(8);
+                for (let i = 0; i < 8; i++) bytes[i] = u8(off + 1 + i);
+                out[key] = new DataView(bytes.buffer).getFloat64(0);
+                off += 9;
+            } else if (t === 1) {
+                out[key] = u8(off + 1) !== 0;
+                off += 2;
+            } else if (t === 2) {
+                const len = u16(off + 1);
+                out[key] = bin.substr(off + 3, len);
+                off += 3 + len;
+            } else if (t === 5) {
+                out[key] = null; off += 1;
+            } else if (t === 6) {
+                out[key] = undefined; off += 1;
+            } else {
+                break;                      // unknown type: stop rather than guess
+            }
+
+            off += 1;                       // pad byte after every value
+        }
+
+        return out;
+    }
+
+    function charStorageKeys() {
+        const out = [];
+
+        try {
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.endsWith("//Char")) out.push(key);
+            }
+        } catch (err) { }
+
+        return out;
+    }
+
+    function charStorageKey() {
+        const keys = charStorageKeys();
+
+        for (let i = 0; i < keys.length; i++) {
+            // Ruffle keys shared objects by the SWF's host with no port
+            // ("127.0.0.1//Char"). An older seeding path also wrote a port-qualified
+            // twin ("127.0.0.1:8899//Char") that the client never reads, so prefer the
+            // port-less key when both are present.
+            const host = keys[i].slice(0, keys[i].indexOf("//"));
+
+            if (host.indexOf(":") === -1) return keys[i];
+        }
+
+        return keys.length ? keys[0] : null;
+    }
+
+    /*
+       Writes the character save to every "//Char" key that exists. Two host spellings
+       can coexist in one browser, and the game only ever reads one of them, so writing
+       a single key let the panel edit a save the client never opened.
+    */
+    /*
+       The client stores gender as 0 (girl) or 1 (boy), and gameplay's verifyUserData()
+       opens popups/lostlook.swf ("your game data has been lost") whenever the save holds
+       anything else - including nothing at all, or the "M"/"F" the tracking calls use.
+       The character creator writes its own save after the page mounts, so normalise on
+       every write and not just when seeding a default.
+    */
+    function genderCode(value) {
+        if (value === 0 || value === 1) return value;
+        if (value === true) return 1;
+        if (value === false) return 0;
+
+        const text = String(value == null ? "" : value).trim().toLowerCase();
+
+        return text === "0" || text === "f" || text === "girl" || text === "female" ? 0 : 1;
+    }
+
+    function writeChar(state) {
+        const keys = charStorageKeys(),
+              normalised = Object.assign({}, state, { gender: genderCode(state.gender) });
+
+        keys.forEach(function (key) {
+            localStorage.setItem(key, buildLso("Char", normalised));
+        });
+
+        return keys.length > 0;
+    }
+
+    function charState() {
+        const key = charStorageKey();
+        if (!key) return null;
+
+        try {
+            return parseLso(localStorage.getItem(key));
+        } catch (err) {
+            return null;
+        }
+    }
+
+    /*
+       Writes a shared object back out in the same format parseLso reads. Proved by
+       re-serialising the stored "Char" object: the result is byte-identical to what
+       Ruffle wrote (551 bytes), so only the fields we deliberately change differ.
+    */
+    function buildLso(name, obj) {
+        const out = [0x00, 0xbf, 0, 0, 0, 0];
+        const w8 = function (v) { out.push(v & 0xff); };
+        const w16 = function (v) { w8(v >> 8); w8(v); };
+        const w32 = function (v) { w8(v >>> 24); w8(v >>> 16); w8(v >>> 8); w8(v); };
+        const wStr = function (s) { for (let i = 0; i < s.length; i++) w8(s.charCodeAt(i)); };
+        const wDouble = function (v) {
+            const bytes = new Uint8Array(8);
+            new DataView(bytes.buffer).setFloat64(0, v);
+            for (let i = 0; i < 8; i++) w8(bytes[i]);
+        };
+
+        "TCSO".split("").forEach(function (ch) { w8(ch.charCodeAt(0)); });
+        w16(4);                              // version, as Ruffle writes it
+        w16(0);
+        w32(name.length); wStr(name); w32(0);
+
+        /*
+           The save-data toolbar (flashpoint/saveData.swf) only hands "Returning
+           Player" a restore when the character save carries flashpointReady - base.php
+           gave it that field in the curation, with no way to do it from a static host.
+           Without the field the button warns "No save data exists" and reloads, even
+           though the character is sitting right there.
+        */
+        let fields = obj;
+
+        if (name === "Char") {
+            fields = Object.assign({}, obj, { flashpointReady: true });
+
+            /*
+               A character carrying a login name is a registered account on this
+               mirror - sw.js answers login.php with registered:"1" - but nothing on a
+               static host writes that back into the save, so the client kept its own
+               isRegistred at false and treated a restored character as a guest.
+            */
+            if (typeof fields.login === "string" && fields.login.trim())
+                fields.Registred = true;
+        }
+
+        Object.keys(fields).forEach(function (key) {
+            const value = fields[key];
+
+            w16(key.length); wStr(key);
+
+            if (typeof value === "number") { w8(0); wDouble(value); }
+            else if (typeof value === "boolean") { w8(1); w8(value ? 1 : 0); }
+            else if (typeof value === "string") { w8(2); w16(value.length); wStr(value); }
+            else { w8(6); }                  // undefined
+
+            w8(0);                           // pad byte after every value
+        });
+
+        const total = out.length - 6;
+        out[2] = (total >>> 24) & 0xff;
+        out[3] = (total >>> 16) & 0xff;
+        out[4] = (total >>> 8) & 0xff;
+        out[5] = total & 0xff;
+
+        let bin = "";
+        for (let i = 0; i < out.length; i++) bin += String.fromCharCode(out[i] & 0xff);
+
+        return btoa(bin);
+    }
+
+    const PENDING_LOGIN = "pop.pendingLogin",
+          PENDING_CHAR = "pop.pendingChar",
+          ACTIVE_ACCOUNT = "pop.activeAccount",
+          LOOK_BACKUP = "pop.lookBackup";
+
+    /*
+       Applied on the next load from main(), before the game mounts: swaps only the
+       login name inside the character save that already boots, leaving every other
+       field exactly as the game wrote it. Nothing is written from the panel itself,
+       because Ruffle would overwrite it on unload.
+    */
+    window.popApplyPendingLogin = function () {
+        let pending = null, avatar = null;
+
+        try {
+            pending = localStorage.getItem(PENDING_LOGIN);
+            avatar = JSON.parse(localStorage.getItem(PENDING_CHAR) || "null");
+        } catch (err) { }
+
+        if (!pending) return;
+
+        try {
+            const key = charStorageKey(), state = charState();
+
+            if (key && state) {
+                const next = Object.assign({}, state, { login: pending });
+
+                if (avatar && typeof avatar === "object") {
+                    Object.keys(avatar).forEach(function (name) {
+                        // null means "drop this field", anything else is a value to set.
+                        if (avatar[name] === null) delete next[name];
+                        else next[name] = avatar[name];
+                    });
+                }
+
+                writeChar(next);
+                localStorage.setItem(ACTIVE_ACCOUNT, pending);
+            }
+        } catch (err) { }
+
+        try {
+            localStorage.removeItem(PENDING_LOGIN);
+            localStorage.removeItem(PENDING_CHAR);
+        } catch (err) { }
+    };
+
+    /*
+       A brand-new browser profile has no account, so the client's creator writes a
+       placeholder character: every frame field is the numeric 1 and shirtFrame /
+       pantsFrame are numbers instead of part names. The client reads that save as
+       "user data lost" and covers the island with popups/lostlook.swf, which is the
+       "SORRY, BUT ... HAS BEEN LOST" card. Replace just such a save with the canonical
+       default look before Ruffle mounts; a save with real part names is left alone.
+    */
+    const DEFAULT_LOOK = {
+        skinColor: 14193168,
+        lineColor: 11301900,
+        hairColor: 14193168,
+        eyelidsPos: 79,
+        eyesFrame: 2,
+        pantsFrame: "Sears6",
+        lineWidth: 4,
+        shirtFrame: "boyShirt1",
+        hairFrame: 9,
+        mouthFrame: 14,
+        marksFrame: 1,
+        itemFrame: 1,
+        packFrame: 1,
+        facialFrame: 1,
+        overshirtFrame: 1,
+        overpantsFrame: 1,
+        gender: 1
+    };
+
+    window.popEnsureLook = function () {
+        try {
+            const key = charStorageKey(), state = charState();
+
+            if (!key || !state) return;
+
+            const placeholder = typeof state.shirtFrame !== "string" ||
+                                typeof state.pantsFrame !== "string" ||
+                                !state.hairFrame || state.hairFrame === 1;
+
+            if (!placeholder) return;
+
+            writeChar(Object.assign({}, state, DEFAULT_LOOK));
+        } catch (err) { }
+    };
+
+    /*
+       This mirror boots straight into the island, so the client's own login flow never
+       runs and nothing ever writes a login name into the character save - the panel
+       showed "Saved game login: none" and the client's isRegistred stayed false, which
+       is what made a restored character an unregistered guest. Every local account is
+       a registered account here (sw.js answers login.php with registered:"1"), so stamp
+       the account that is playing onto the save before the game reads it.
+    */
+    window.popEnsureIdentity = function () {
+        try {
+            const key = charStorageKey(), state = charState();
+
+            if (!key || !state) return false;
+
+            const login = String(state.login || "").trim() || activeAccount() || "player",
+                  gender = genderCode(state.gender);
+
+            // Gender belongs in this check: a save the character creator left without a
+            // valid one makes the client raise lostlook.swf over the island, so heal it.
+            if (state.login === login && state.Registred === true && state.gender === gender) return false;
+
+            writeChar(Object.assign({}, state, { login: login, Registred: true }));
+
+            try { localStorage.setItem(ACTIVE_ACCOUNT, login); } catch (err) { }
+
+            return true;
+        } catch (err) {
+            return false;
+        }
+    };
+
+    /*
+       Writes a complete default character when the browser has none at all, so the
+       client never reads the placeholder save createUser.swf leaves behind - that
+       placeholder is what raises the "user data lost" card on a brand-new profile.
+       Ruffle keys shared objects as "<host>//<name>", so reuse the host of any shared
+       object already present and fall back to the page's own host.
+    */
+    window.popSeedCharacter = function (login) {
+        try {
+            if (charState()) return false;
+
+            let host = null;
+
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.indexOf("//") > -1) { host = key.slice(0, key.indexOf("//")); break; }
+            }
+
+            const state = Object.assign({}, DEFAULT_LOOK, {
+                login: String(login || "player"),
+                Registred: false,
+                visited: "0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"
+            });
+
+            localStorage.setItem((host || location.host) + "//Char", buildLso("Char", state));
+            return true;
+        } catch (err) {
+            return false;
+        }
+    };
+
+    /*
+       The character creator (flashpoint/createUser.swf) reinitialises the "Char"
+       save when it starts, which clears skin/hair/frame fields. "Change look" parks
+       the current appearance here first, and this puts it back on the next island
+       load unless the creator actually wrote real values of its own.
+    */
+    window.popRestoreLook = function () {
+        let saved = null;
+
+        try { saved = JSON.parse(localStorage.getItem(LOOK_BACKUP) || "null"); } catch (err) { }
+
+        if (!saved) return;
+
+        try {
+            const key = charStorageKey(), state = charState();
+
+            if (key && state) {
+                const missing = Object.keys(saved).filter(function (name) {
+                    return state[name] === undefined || state[name] === null;
+                });
+
+                // The backup is only consumed once it has actually been used, and it
+                // survives loads where the save was still intact - otherwise it would
+                // be deleted on the creator's own load, before that load wipes the save.
+                if (missing.length >= 6) {
+                    writeChar(Object.assign({}, state, saved));
+                    localStorage.removeItem(LOOK_BACKUP);
+                }
+            }
+        } catch (err) { }
+    };
+
+    /*
+       "Play as": queues the rename and reloads, so the island boots with the chosen
+       account's name. The previous save is kept under pop.charBackup first.
+    */
+    /* The parts of the character save that make up the avatar on screen. */
+    const APPEARANCE = ["skinColor", "lineColor", "hairColor", "eyelidsPos", "eyesFrame",
+                        "pantsFrame", "lineWidth", "shirtFrame", "hairFrame", "mouthFrame",
+                        "marksFrame", "itemFrame", "packFrame", "facialFrame",
+                        "overshirtFrame", "overpantsFrame", "gender",
+                        "specialAbility", "specialAbilityParams"];
+
+    function appearanceOf(state) {
+        const out = {};
+
+        APPEARANCE.forEach(function (name) {
+            if (state && Object.prototype.hasOwnProperty.call(state, name)) out[name] = state[name];
+        });
+
+        return out;
+    }
+
+    function activeAccount() {
+        try { return localStorage.getItem(ACTIVE_ACCOUNT) || ""; } catch (err) { return ""; }
+    }
+
+    function rememberChar(username, avatar) {
+        return fetch("__pop_set_char.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: username, char: avatar })
+        }).catch(function () { });
+    }
+
+    async function playAs(account) {
+        const key = charStorageKey(), state = charState();
+
+        if (!key || !state) {
+            setNote("No saved character to copy yet - start the game once, then try again.", true);
+            return;
+        }
+
+        const playing = activeAccount(),
+              onScreen = appearanceOf(state),
+              own = account.char && Object.keys(account.char).length ? account.char : null;
+
+        // Park the avatar that is on screen on the account that owns it, so switching
+        // accounts does not lose the character that was just being played.
+        if (playing && playing !== account.username) await rememberChar(playing, onScreen);
+
+        // An account with a character of its own gets it back; a new one adopts the
+        // avatar on screen and keeps it from then on.
+        const avatar = own || onScreen;
+        if (!own) await rememberChar(account.username, onScreen);
+
+        try {
+            localStorage.setItem("pop.charBackup", localStorage.getItem(key));
+            localStorage.setItem(PENDING_LOGIN, account.username);
+            localStorage.setItem(PENDING_CHAR, JSON.stringify(avatar));
+        } catch (err) {
+            setNote("Could not queue the character rename.", true);
+            return;
+        }
+
+        setNote("Loading the island as " + account.username + "...");
+        location.reload();
+    }
+
+    window.popBuildLso = buildLso;
+    window.popRefreshPanel = refresh;
+
+    window.popSaveState = charState;
+
+    function emptyRow(text) {
+        const li = document.createElement("li");
+        li.id = "accountsEmpty";
+        li.textContent = text;
+        return li;
+    }
+
+    function accountRow(account) {
+        const li = document.createElement("li"),
+              name = document.createElement("b"),
+              info = document.createElement("i"),
+              play = document.createElement("button"),
+              del = document.createElement("button");
+
+        name.textContent = account.username +
+                           (activeAccount() === account.username ? " \u00b7 playing" : "");
+        info.textContent = (account.credits || "0") + "c";
+
+        play.type = "button";
+        play.textContent = "play";
+        play.title = "Load the island as " + account.username + " (rewrites the saved character name)";
+        play.addEventListener("click", function () {
+            play.disabled = true;
+            playAs(account);
+        });
+
+        del.type = "button";
+        del.textContent = "delete";
+        del.title = "Delete " + account.username + " from this browser";
+        del.addEventListener("click", async function () {
+            del.disabled = true;
+            try {
+                await fetch("__pop_delete_account.php", {
+                    method: "POST",
+                    body: new URLSearchParams({ username: account.username }).toString()
+                });
+            } catch (err) { }
+            await refresh();
+        });
+
+        li.append(name, info, play, del);
+        return li;
+    }
+
+    /*
+       The Flashpoint save shim keeps the logged-in name in its own shared object
+       ("FlashpointBackup"), stored as base64 AMF. Read just that one string out of it
+       so the panel can show which name the saved game is carrying - no rewriting.
+    */
+    function savedLoginName() {
+        try {
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (!key || !key.endsWith("//FlashpointBackup")) continue;
+
+                const bin = atob(localStorage.getItem(key) || "");
+
+                // This dialect encodes lengths as (length << 1) | 1, and string
+                // values as 0x06 followed by that length byte, so the "login" key
+                // reads as 00 0b "login" 06 19 "GUEST4630169" (0x19 = 12 chars).
+                const at = bin.indexOf(String.fromCharCode(0, (5 << 1) | 1) + "login");
+                if (at < 0) continue;
+
+                const size = bin.charCodeAt(at + 8),
+                      len = (size - 1) >> 1;
+
+                return bin.substr(at + 9, len);
+            }
+        } catch (err) { }
+
+        return null;
+    }
+
+    let refreshSeq = 0;
+
+    /*
+       First run in a browser: the client's own creator leaves a placeholder character
+       and no account record at all, so the panel has nothing to list and switching
+       accounts cannot work. Register the character that is on screen as a real local
+       account, once per load, so a fresh profile starts with a proper character
+       instead of depending on the look guard alone.
+    */
+    let seedTried = false;
+
+    async function seedFirstRun(known) {
+        if (seedTried) return known || [];
+
+        /*
+           Until the worker controls this page its endpoints are just files that do
+           not exist, so asking here is what produced the "__pop_accounts.php 404" a
+           first load logs. pop-sw-ready fires once it takes over and re-runs this.
+        */
+        if (!("serviceWorker" in navigator) || !navigator.serviceWorker.controller)
+            return known || [];
+
+        // Called both from the panel's refresh and from main(); when the caller has no
+        // list yet (the service worker is not in control on a profile's very first
+        // load, so __pop_accounts.php 404s), ask for one here instead of giving up.
+        let accounts = known;
+
+        if (!accounts) {
+            try {
+                accounts = (await (await fetch("__pop_accounts.php?seed=1", { cache: "no-store" })).json()).accounts || [];
+            } catch (err) {
+                // The worker is not serving this page yet on a profile's first load, so
+                // give up for now instead of retrying on every watcher tick.
+                seedTried = true;
+                return [];
+            }
+        }
+
+        seedTried = true;
+
+        if (accounts.length) return accounts;
+
+        const key = charStorageKey(), state = charState();
+
+        // No character yet - the creator has not written one. Leave seedTried false so
+        // the save watcher can try again once it appears.
+        if (!key || !state) {
+            seedTried = false;
+            return accounts;
+        }
+
+        const username = String(state.login || "").trim().toLowerCase() || "player";
+
+        try {
+            const body = new URLSearchParams({
+                username: username,
+                gender: state.gender === 0 ? "F" : "M",
+                look: JSON.stringify(appearanceOf(state))
+            });
+
+            await fetch("part-register.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: body.toString()
+            });
+
+            await rememberChar(username, appearanceOf(state));
+
+            try { localStorage.setItem(ACTIVE_ACCOUNT, username); } catch (err) { }
+
+            return (await (await fetch("__pop_accounts.php")).json()).accounts || accounts;
+        } catch (err) {
+            return accounts;
+        }
+    }
+
+    window.popSeedFirstRun = seedFirstRun;
+
+    async function refresh() {
+        // Reachable from main(): the panel is built before a queued character change is
+        // applied, so it has to re-read once that has happened. Two runs can overlap
+        // (the panel opening and main()'s refresh), so only the newest one draws the
+        // list - otherwise every account is appended twice.
+        const run = ++refreshSeq;
+        let accounts;
+
+        list.textContent = "";
+
+        const state = charState();
+
+        // The character save is what the game boots with. The shim keeps its own copy
+        // of the name (savedLoginName), which lags behind once the panel renames the
+        // character, so it is only a fallback here.
+        save.textContent = "Saved game login: " + ((state && state.login) || savedLoginName() || "none");
+        charBox.textContent = "";
+
+        if (state && Object.keys(state).length) {
+            Object.keys(state).forEach(function (name) {
+                const value = state[name],
+                      row = document.createElement("div");
+
+                row.textContent = name + ": " + (value === undefined ? "—" : String(value));
+                charBox.appendChild(row);
+            });
+        } else {
+            charBox.textContent = "No character save yet.";
+        }
+
+        /*
+           Accounts come from sw.js, so without a worker every .php call lands on the
+           static host as a 404. Say which of the two reasons applies instead of
+           showing "unavailable" and a console full of failures.
+        */
+        if (!("serviceWorker" in navigator)) {
+            list.appendChild(emptyRow("Local accounts need a service worker, which this window does not provide - private/incognito browsing disables them. Open the game in a normal window."));
+            return;
+        }
+
+        if (!navigator.serviceWorker.controller) {
+            list.appendChild(emptyRow("Starting the local account backend - the list will fill in by itself."));
+            return;
+        }
+
+        try {
+            accounts = (await (await fetch("__pop_accounts.php")).json()).accounts || [];
+        accounts = await seedFirstRun(accounts);
+        } catch (err) {
+            list.appendChild(emptyRow("Local accounts unavailable."));
+            return;
+        }
+
+        if (run !== refreshSeq) return;      // a newer refresh already owns the list
+
+        if (!accounts.length) {
+            list.appendChild(emptyRow("No accounts saved yet."));
+            return;
+        }
+
+        accounts.forEach(function (account) { list.appendChild(accountRow(account)); });
+    }
+
+    /*
+       Back the accounts up to a file, and restore them in another browser. The file
+       is exactly what __pop_accounts.php serves; import merges and leaves any account
+       that already exists here untouched.
+    */
+    async function exportAccounts() {
+        const data = await (await fetch("__pop_accounts.php")).json();
+
+        return JSON.stringify({ saved: new Date().toISOString(), accounts: data.accounts || [] }, null, 2);
+    }
+
+    window.popExportAccounts = exportAccounts;
+
+    exportBtn.addEventListener("click", async function () {
+        try {
+            const text = await exportAccounts(),
+                  blob = new Blob([text], { type: "application/json" }),
+                  url = URL.createObjectURL(blob),
+                  link = document.createElement("a");
+
+            link.href = url;
+            link.download = "poptropica-accounts.json";
+            link.click();
+            setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+
+            setNote("Export prepared: " + JSON.parse(text).accounts.length + " account(s).");
+        } catch (err) {
+            setNote("Export failed: local accounts are unavailable.", true);
+        }
+    });
+
+    /*
+       Reopens Poptropica's own character creator. The loader already has a route for
+       it: the "ready" cookie sends the next load through flashpoint/createUser.swf
+       instead of the island, which is exactly what a first run does. The cookie is
+       consumed on that load, so this cannot loop.
+    */
+    if (lookBtn) lookBtn.addEventListener("click", function () {
+        const key = charStorageKey(), state = charState();
+
+        try {
+            if (key) localStorage.setItem("pop.charBackup", localStorage.getItem(key) || "");
+            if (state) localStorage.setItem(LOOK_BACKUP, JSON.stringify(appearanceOf(state)));
+        } catch (err) { }
+
+        setCookieFlag(COOKIE_NEW_USER, true);
+        location.reload();
+    });
+
+    importBtn.addEventListener("click", function () { fileInput.click(); });
+
+    fileInput.addEventListener("change", async function () {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+
+        let text = "", parsed = null;
+
+        try {
+            text = await file.text();
+        } catch (err) {
+            setNote("Import failed: could not read that file.", true);
+            fileInput.value = "";
+            return;
+        }
+
+        try {
+            parsed = JSON.parse(text);
+        } catch (err) {
+            setNote("Import failed: that file is not valid JSON.", true);
+            fileInput.value = "";
+            await refresh();
+            return;
+        }
+
+        const list = Array.isArray(parsed) ? parsed : (parsed && parsed.accounts) || [];
+
+        if (!list.length) {
+            setNote("Import failed: no accounts in that file.", true);
+            fileInput.value = "";
+            await refresh();
+            return;
+        }
+
+        try {
+            const result = await (await fetch("__pop_import_accounts.php", {
+                method: "POST",
+                body: text
+            })).json();
+
+            await refresh();
+
+            if (result.imported)
+                setNote("Imported " + result.imported + " account(s)" +
+                        (result.skipped ? ", skipped " + result.skipped + " already saved here." : "."));
+            else
+                setNote("Nothing new: all " + result.skipped + " account(s) are already saved here.");
+        } catch (err) {
+            setNote("Import failed: local accounts are unavailable.", true);
+        }
+
+        fileInput.value = "";
+    });
+
+    /*
+       The panel remembers whether it was open, and re-reads its list whenever the tab
+       is looked at again - the game can write saves while the panel sits open.
+    */
+    const PANEL_KEY = "pop.accountsPanel";
+
+    /* Keep keyboard input where it belongs: the panel takes focus while it is open,
+       and the game gets focus back (plus a pointer nudge) when it closes. */
+    function focusGame() {
+        const game = document.getElementById("game");
+
+        if (game && typeof game.focus === "function") {
+            try { game.focus(); } catch (err) { }
+        }
+    }
+
+    function setOpen(open) {
+        panel.hidden = !open;
+
+        try { localStorage.setItem(PANEL_KEY, open ? "1" : "0"); } catch (err) { }
+
+        if (open) {
+            setNote("");
+            refresh();
+            try { panel.focus(); } catch (err) { }
+        } else {
+            focusGame();
+        }
+    }
+
+    /* Alt+A toggles the panel; Escape closes it. Both stop here so the game never
+       sees them, and the shortcut is Alt-based so ordinary typing still reaches Flash. */
+    window.addEventListener("keydown", function (event) {
+        const altA = event.altKey && !event.ctrlKey && !event.metaKey &&
+                     (event.key === "a" || event.key === "A" || event.code === "KeyA");
+
+        if (altA) {
+            event.preventDefault();
+            event.stopPropagation();
+            setOpen(panel.hidden);
+            return;
+        }
+
+        if (event.key === "Escape" && !panel.hidden) {
+            event.preventDefault();
+            event.stopPropagation();
+            setOpen(false);
+        }
+    });
+
+    btn.addEventListener("click", function () { setOpen(panel.hidden); });
+
+    close.addEventListener("click", function () { setOpen(false); });
+
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden && !panel.hidden) refresh();
+    });
+
+    window.addEventListener("focus", function () {
+        if (!panel.hidden) refresh();
+    });
+
+    try {
+        if (localStorage.getItem(PANEL_KEY) === "1") setOpen(true);
+    } catch (err) { }
+})();
+
+window.dbug = dbug;
+// The AS3 shims probe for this; without it they take their "is flashpointReady
+// defined?" error path even though nothing is actually wrong.
+window.flashpointReady = window.flashpointReady || function (message) {
+    if (message) console.log(message);
+};
+window.flashpointLoad = window.flashpointLoad || flashpointLoad;
+window.flashpointError = flashpointError;
+window.setInteractivity = window.setInteractivity || function () {};
+window.loadTrackingPixel = window.loadTrackingPixel || function () {};
+window.finalize = window.finalize || function () {};
+window.setAdStatus = window.setAdStatus || getAdStatus;
+window.setCharLazyLoadStatus = window.setCharLazyLoadStatus || getCharLazyLoadStatus;
+
+/*
+   Debug helper, off unless localStorage['pop.debugSO'] is "1". Ruffle keeps shared
+   objects in localStorage under "<host>//<name>", so wrapping storage shows exactly
+   which saves a run reads, writes and removes, in order. Entries go to sessionStorage
+   so they survive the reloads the game performs.
+*/
+(function instrumentSharedObjects() {
+    try {
+        if (localStorage.getItem("pop.debugSO") !== "1") return;
+    } catch (err) {
+        return;
+    }
+
+    const MAX = 300,
+          rawGet = Storage.prototype.getItem,
+          rawSet = Storage.prototype.setItem,
+          rawRemove = Storage.prototype.removeItem,
+          rawClear = Storage.prototype.clear;
+
+    function record(op, key, size, value) {
+        try {
+            const log = JSON.parse(sessionStorage.getItem("pop.solog") || "[]"),
+                  entry = { t: Date.now(), op: op, key: key, size: size };
+
+            // Keep the payload for character writes so two saves can be compared.
+            if (typeof value === "string" && key.indexOf("//Char") > -1) entry.v = value.slice(0, 6000);
+
+            log.push(entry);
+            while (log.length > MAX) log.shift();
+
+            sessionStorage.setItem("pop.solog", JSON.stringify(log));
+        } catch (err) { }
+    }
+
+    function watched(key) {
+        return typeof key === "string" && key.indexOf("//") > -1;
+    }
+
+    Storage.prototype.getItem = function (key) {
+        const value = rawGet.call(this, key);
+        if (this === localStorage && watched(key)) record("get", key, typeof value === "string" ? value.length : 0);
+        return value;
+    };
+
+    Storage.prototype.setItem = function (key, value) {
+        if (this === localStorage && watched(key)) record("set", key, typeof value === "string" ? value.length : 0, value);
+        return rawSet.call(this, key, value);
+    };
+
+    Storage.prototype.removeItem = function (key) {
+        if (this === localStorage && watched(key)) record("del", key, 0);
+        return rawRemove.call(this, key);
+    };
+
+    Storage.prototype.clear = function () {
+        if (this === localStorage) record("clear", "(all)", 0);
+        return rawClear.call(this);
+    };
+
+    window.popSOLog = function () {
+        try { return JSON.parse(sessionStorage.getItem("pop.solog") || "[]"); } catch (err) { return []; }
+    };
+
+    window.popSOLogClear = function () {
+        try { sessionStorage.removeItem("pop.solog"); } catch (err) { }
+    };
+})();
+
+/*
+   Fullscreen is the only way past the window-width ceiling: the stage already fits the
+   viewport, so with the same window there is nothing left to grow into.
+*/
+const fsBtn = document.getElementById("fsBtn");
+
+if (fsBtn) fsBtn.addEventListener("click", function () {
+    if (document.fullscreenElement) {
+        document.exitFullscreen();
+        return;
+    }
+
+    if (document.documentElement.requestFullscreen)
+        document.documentElement.requestFullscreen().catch(function () { });
+});
+
+document.addEventListener("fullscreenchange", fitStage);
+
+/*
+   flashpoint/createUser.swf writes its Character save after the page has mounted, so a
+   heal or a first-run registration done in main() cannot see it: at that moment there
+   is no save at all. Watch for it to appear and re-run both, which is what makes a
+   brand-new profile end up with a real character and a real local account.
+   Rewriting localStorage here is safe because Ruffle only flushes its own copy over
+   the top when the page unloads.
+*/
+const saveWatcher = setInterval(function () {
+    if (typeof window.popEnsureLook === "function") window.popEnsureLook();
+    if (typeof window.popEnsureIdentity === "function") window.popEnsureIdentity();
+    if (typeof window.popSeedFirstRun === "function") window.popSeedFirstRun();
+}, 2000);
+
+setTimeout(function () { clearInterval(saveWatcher); }, 180000);
+
+// The game starts last: the accounts panel above defines popApplyPendingLogin, and a
+// queued character rename must be written before Ruffle mounts and starts flushing.
+main();
+    </script>
+</body>
+</html>

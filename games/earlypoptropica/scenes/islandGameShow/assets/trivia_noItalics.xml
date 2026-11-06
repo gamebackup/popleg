@@ -1,0 +1,1086 @@
+<Quiz>
+
+<Category name="Famous Landmarks">
+
+	<Question difficulty="1">
+		<Prompt>The Eiffel Tower was built for the 1889 World's Fair in this European city.</Prompt>
+	<Response>London</Response>
+		<Response>Rome</Response>
+		<Response>Madrid</Response>
+		<Response answer="true">Paris</Response>
+	</Question>
+
+	<Question difficulty="1">
+		<Prompt>The president of the United States lives at this residence located at 1600 Pennsylvania Avenue.</Prompt>
+		<Response>The Washington Monument</Response>
+		<Response>The Kennedy Center</Response>
+		<Response>The Lincoln Memorial</Response>
+		<Response answer="true">The White House</Response>
+	</Question>
+
+	<Question difficulty="1">
+		<Prompt>In ancient Rome, Gladiators fought against each other in this arena.</Prompt>
+	<Response>The Circus Maximus</Response>
+		<Response>The Pantheon</Response>
+		<Response>The Forum</Response>
+		<Response answer="true">The Colosseum</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>In the 1933 and 2005 versions of 'King Kong', the great ape is attacked by airplanes as he stands atop this famous New York City skyscraper.</Prompt>
+		<Response>The Chrysler Building</Response>
+		<Response>The Flatiron Building</Response>
+		<Response>Sears Tower</Response>
+		<Response answer="true">The Empire State Building</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>This Chinese structure, originally built to keep out invaders, is nearly 4,000 miles long.</Prompt>
+		<Response>The Bird's Nest stadium</Response>
+		<Response>The Forbidden City</Response>
+		<Response>The Liuhe Pagoda</Response>
+		<Response answer="true">The Great Wall of China</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>Windmills are commonly associated with Holland, a region of this country.</Prompt>
+		<Response>France</Response>
+		<Response>Belgium</Response>
+		<Response>Spain</Response>
+		<Response answer="true">The Netherlands</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>Red Square can be found in this Russian city.</Prompt>
+		<Response>Novgorod</Response>
+		<Response>Ekaterinburg</Response>
+		<Response>St. Petersburg</Response>
+		<Response answer="true">Moscow</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>George Washington, Abraham Lincoln, Thomas Jefferson, and this president are all featured on Mt. Rushmore.</Prompt>
+		<Response>John Adams</Response>
+		<Response>John F. Kennedy</Response>
+		<Response>Barack Obama</Response>
+		<Response answer="true">Theodore Roosevelt</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>The Golden Gate Bridge spans this body of water.</Prompt>
+		<Response>The Chesapeake Bay</Response>
+		<Response>The Gulf of Mexico</Response>
+		<Response>Lake Superior</Response>
+		<Response answer="true">San Francisco Bay</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>This popular clock stands at one end of Westminster Bridge in London.</Prompt>
+		<Response>Timely Time</Response>
+		<Response>Punctual Pete</Response>
+		<Response>Chiming Charlie</Response>
+		<Response answer="true">Big Ben</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>The Berlin Wall stood for twenty-eight years in this present-day nation.</Prompt>
+		<Response>Portugal</Response>
+		<Response>Czech Republic</Response>
+		<Response>Poland</Response>
+		<Response answer="true">Germany</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>The Hagia Sophia is a popular tourist destination in this city.</Prompt>
+		<Response>Cairo</Response>
+		<Response>Beirut</Response>
+		<Response>Athens</Response>
+		<Response answer="true">Istanbul</Response>
+	</Question>
+
+
+	<Question difficulty="5">
+		<Prompt>The Great Sphinx of Giza has the head of a man and the body of this animal.</Prompt>
+		<Response>A bear</Response>
+		<Response>A caterpillar</Response>
+		<Response>A peacock</Response>
+		<Response answer="true">A lion</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>Christ the Redeemer is a 130 ft. tall statue in this South American city.</Prompt>
+		<Response>La Paz</Response>
+		<Response>Caracas</Response>
+		<Response>Bogota</Response>
+		<Response answer="true">Rio de Janeiro</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>The Taj Mahal is located in this Indian city.</Prompt>
+		<Response>Mumbai</Response>
+		<Response>Delhi</Response>
+		<Response>Kolkata</Response>
+		<Response answer="true">Agra</Response>
+	</Question>
+
+</Category>
+
+<Category name="Sports">
+
+	<Question difficulty="1">
+		<Prompt>Michael Jordan spent most of his career playing for this basketball team.</Prompt>
+		<Response>Boston Celtics</Response>
+		<Response>Los Angeles Lakers</Response>
+		<Response>Miami Heat</Response>
+		<Response answer="true">Chicago Bulls</Response>
+	</Question>
+
+	<Question difficulty="1">
+		<Prompt>Freestyle and butterfly are events in this sport.</Prompt>
+		<Response>Track and field</Response>
+		<Response>Arm wrestling</Response>
+		<Response>Gymnastics</Response>
+		<Response answer="true">Swimming</Response>
+	</Question>
+
+	<Question difficulty="1">
+		<Prompt>If a boxer is knocked down, they have this amount of time to get back to their feet.</Prompt>
+		<Response>Five seconds</Response>
+		<Response>Thirty seconds</Response>
+		<Response>One hour</Response>
+		<Response answer="true">Ten seconds</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>The winner of this game is crowned champion of the NFL.</Prompt>
+		<Response>The World Series</Response>
+		<Response>The Olympics</Response>
+		<Response>The World Cup</Response>
+		<Response answer="true">The Super Bowl</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>If you spike, set, or bump, you are playing this game.</Prompt>
+		<Response>Water polo</Response>
+		<Response>Tennis</Response>
+		<Response>Badminton</Response>
+		<Response answer="true">Volleyball</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>David Beckham has NOT played for this team.</Prompt>
+		<Response>The English national team</Response>
+		<Response>Manchester United</Response>
+		<Response>Los Angeles Galaxy</Response>
+		<Response answer="true">Chelsea</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>This results when a player is issued a red card in soccer.</Prompt>
+		<Response>They sit on the bench for five minutes.</Response>
+		<Response>They are named the most valuable player of the game.</Response>
+		<Response>They have to pick up everyone's orange peels.</Response>
+		<Response answer="true">They are ejected from the game.</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>Dirk Nowitzki and Kevin Durant play this sport professionally.</Prompt>
+		<Response>Soccer</Response>
+		<Response>Baseball</Response>
+		<Response>Lacrosse</Response>
+		<Response answer="true">Basketball</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>George Herman Ruth, Jr., was known by this nickname.</Prompt>
+		<Response>Pudge</Response>
+		<Response>G-Rod</Response>
+		<Response>Manny</Response>
+		<Response answer="true">Babe</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>Alex Ovechkin plays for this NHL team.</Prompt>
+		<Response>Boston Bruins</Response>
+		<Response>Vancouver Canucks</Response>
+		<Response>Pittsburgh Penguins</Response>
+		<Response answer="true">Washington Capitals</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>This football term refers to tackling an opponent in their own end zone.</Prompt>
+		<Response>An interception</Response>
+		<Response>A fumble</Response>
+		<Response>A touchdown</Response>
+		<Response answer="true">A safety</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>Jeff Gordon and Helio Castroneves both participate in this sport.</Prompt>
+		<Response>Fencing</Response>
+		<Response>Sumo wrestling</Response>
+		<Response>Diving</Response>
+		<Response answer="true">Auto racing</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>This is the term referring to the cricket player who propels the ball toward the wicket.</Prompt>
+		<Response>Pitcher</Response>
+		<Response>Hurler</Response>
+		<Response>Tosser</Response>
+		<Response answer="true">Bowler</Response>
+	</Question>
+
+	<Question difficulty="5" noshuffle="true">
+		<Prompt>This is the amount of points needed to roll a perfect game in ten-pin bowling.</Prompt>
+		<Response>100</Response>
+		<Response>200</Response>
+		<Response answer="true">300</Response>
+		<Response>400</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>If you perform an axel or a Lutz, you are competing in this sport.</Prompt>
+		<Response>Rodeo</Response>
+		<Response>Gymnastics</Response>
+		<Response>Downhill skiing</Response>
+		<Response answer="true">Figure skating</Response>
+	</Question>
+
+
+</Category>
+
+<Category name="Now, Where Did I See Them?">
+
+	<Question difficulty="1">
+		<Prompt>Veruca Salt, Augustus Gloop, Willie Wonka</Prompt>
+		<Response>Up</Response>
+		<Response>Ice Age</Response>
+		<Response>Twilight</Response>
+		<Response answer="true">Charlie and the Chocolate Factory</Response>
+	</Question>
+
+	<Question difficulty="1">
+		<Prompt>Mater, Doc Hudson, Lightning McQueen</Prompt>
+		<Response>Beauty and the Beast</Response>
+		<Response>Freaky Friday</Response>
+		<Response>The Parent Trap</Response>
+		<Response answer="true">Cars</Response>
+	</Question>
+
+	<Question difficulty="1">
+		<Prompt>Hamm, Woody, Buzz Lightyear</Prompt>
+		<Response>Cars</Response>
+		<Response>Babe</Response>
+		<Response>The Incredibles</Response>
+		<Response answer="true">Toy Story</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>Jacques, Marlin, Dory</Prompt>
+		<Response>A Bug's Life</Response>
+		<Response>Happy Feet</Response>
+		<Response>March of the Penguins</Response>
+		<Response answer="true">Finding Nemo</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>Will Turner, Elizabeth Swann, Jack Sparrow</Prompt>
+		<Response>Monsters, Inc.</Response>
+		<Response>Shrek</Response>
+		<Response>The Wizard of Oz</Response>
+		<Response answer="true">Pirates of the Caribbean: The Curse of the Black Pearl</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>Tigress, Shifu, Po</Prompt>
+		<Response>The Jungle Book</Response>
+		<Response>The Lion King</Response>
+		<Response>Aladdin</Response>
+		<Response answer="true">Kung Fu Panda</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>Greg, Rowley, Fregley</Prompt>
+		<Response>How To Train Your Dragon</Response>
+		<Response>Despicable Me</Response>
+		<Response>The Chronicles of Narnia: The Lion, the Witch, and the Wardrobe</Response>
+		<Response answer="true">Diary of a Wimpy Kid</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>Astrid, Stoick the Vast, Hiccup</Prompt>
+		<Response>Despicable Me</Response>
+		<Response>Diary of a Wimpy Kid</Response>
+		<Response>The Chronicles of Narnia: The Lion, the Witch, and the Wardrobe</Response>
+		<Response answer="true">How To Train Your Dragon</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>Agnes, Vector, Gru</Prompt>
+		<Response>How To Train Your Dragon</Response>
+		<Response>The Chronicles of Narnia: The Lion, the Witch, and the Wardrobe</Response>
+		<Response>Diary of a Wimpy Kid</Response>
+		<Response answer="true">Despicable Me</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>Princess Leia, Han Solo, Luke Skywalker</Prompt>
+		<Response>Star Trek</Response>
+		<Response>A Star Is Born</Response>
+		<Response>Spaceballs</Response>
+		<Response answer="true">Star Wars</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>Rafiki, Mufasa, Simba</Prompt>
+		<Response>The Jungle Book</Response>
+		<Response>Kung Fu Panda</Response>
+		<Response>Hamlet</Response>
+		<Response answer="true">The Lion King</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>Sallah, Marion Ravenwood, Indiana Jones</Prompt>
+		<Response>Star Wars</Response>
+		<Response>Robin Hood</Response>
+		<Response>Hoosiers</Response>
+		<Response answer="true">Raiders of the Lost Ark</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>Scut Farkus, Randy, Ralphie</Prompt>
+		<Response>How the Grinch Stole Christmas</Response>
+		<Response>A Christmas Carol</Response>
+		<Response>Christmas Vacation</Response>
+		<Response answer="true">A Christmas Story</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>Westley, Buttercup, Inigo Montoya</Prompt>
+		<Response>Robin Hood</Response>
+		<Response>The Three Musketeers</Response>
+		<Response>The Count of Monte Cristo</Response>
+		<Response answer="true">The Princess Bride</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>Larry Daley, Attila the Hun, Teddy Roosevelt</Prompt>
+		<Response>Meet the Parents</Response>
+		<Response>Madagascar</Response>
+		<Response>School of Rock</Response>
+		<Response answer="true">Night at the Museum</Response>
+	</Question>
+
+</Category>
+
+<Category name="Complete the Song Title">
+
+	<Question difficulty="1">
+		<Prompt>Lady GaGa: Poker ...</Prompt>
+		<Response>Smile</Response>
+		<Response>Eyes</Response>
+		<Response>Game</Response>
+		<Response answer="true">Face</Response>
+	</Question>
+
+	<Question difficulty="1">
+		<Prompt>Weezer: Pork and ...</Prompt>
+		<Response>Soda</Response>
+		<Response>Eggs</Response>
+		<Response>Lollipops</Response>
+		<Response answer="true">Beans</Response>
+	</Question>
+
+	<Question difficulty="1">
+		<Prompt>Bon Jovi: Wanted Dead or ...</Prompt>
+		<Response>Crying</Response>
+		<Response>Behind Bars</Response>
+		<Response>In Chains</Response>
+		<Response answer="true">Alive</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>AC/DC: Back in ...</Prompt>
+		<Response>White</Response>
+		<Response>Red</Response>
+		<Response>Blue</Response>
+		<Response answer="true">Black</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>Green Day: American ...</Prompt>
+		<Response>Man</Response>
+		<Response>Flag</Response>
+		<Response>Band</Response>
+		<Response answer="true">Idiot</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>Gwen Stefani: The Sweet ...</Prompt>
+		<Response>Life</Response>
+		<Response>Surrender</Response>
+		<Response>Sugar</Response>
+		<Response answer="true">Escape</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>Avril Lavigne: Sk8er ...</Prompt>
+		<Response>Gurl</Response>
+		<Response>Shews</Response>
+		<Response>Dood</Response>
+		<Response answer="true">Boi</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>Baha Men: Who Let ...</Prompt>
+		<Response>The Pig in the Kitchen</Response>
+		<Response>The Chicken Eat My Sandwich</Response>
+		<Response>The Guinea Pig Play with My Socks</Response>
+		<Response answer="true">The Dogs Out</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>Journey: Don't Stop ...</Prompt>
+		<Response>Dreaming</Response>
+		<Response>Singing</Response>
+		<Response>Breathing</Response>
+		<Response answer="true">Believing</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>Jordin Sparks: No ...</Prompt>
+		<Response>Snow</Response>
+		<Response>Rain</Response>
+		<Response>Sunshine</Response>
+		<Response answer="true">Air</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>Guns n' Roses: Sweet Child O' ...</Prompt>
+		<Response>The Jungle</Response>
+		<Response>Yours</Response>
+		<Response>Ours</Response>
+		<Response answer="true">Mine</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>Dropkick Murphys: Shipping Up to ...</Prompt>
+		<Response>Manhattan</Response>
+		<Response>Chicago</Response>
+		<Response>L.A.</Response>
+		<Response answer="true">Boston</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>Led Zeppelin: Stairway to ...</Prompt>
+		<Response>Eternity</Response>
+		<Response>Life</Response>
+		<Response>The Attic</Response>
+		<Response answer="true">Heaven</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>Michael Jackson: Billie ...</Prompt>
+		<Response>Joe</Response>
+		<Response>Bob</Response>
+		<Response>Reginald</Response>
+		<Response answer="true">Jean</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>Beatles: Hey ...</Prompt>
+		<Response>Joe</Response>
+		<Response>Josh</Response>
+		<Response>Come Back with My Wallet</Response>
+		<Response answer="true">Jude</Response>
+	</Question>
+
+</Category>
+
+<Category name="Bad Guys">
+
+	<Question difficulty="1">
+		<Prompt>This green-haired Batman villain appeared in 'The Dark Knight'.</Prompt>
+		<Response>The Penguin</Response>
+		<Response>Catwoman</Response>
+		<Response>The Riddler</Response>
+		<Response answer="true">The Joker</Response>
+	</Question>
+
+	<Question difficulty="1">
+		<Prompt>Along with his cat Azrael, this mean guy spends his days trying to catch Smurfs.</Prompt>
+		<Response>Dastardly</Response>
+		<Response>Muttley</Response>
+		<Response>Magilla Gorilla</Response>
+		<Response answer="true">Gargamel</Response>
+	</Question>
+
+	<Question difficulty="1">
+		<Prompt>The crooks on this show often complain that they would have gotten away with their crimes "if it hadn't been for those meddling kids."</Prompt>
+		<Response>The Jetsons</Response>
+		<Response>The Flintstones</Response>
+		<Response>The Smurfs</Response>
+		<Response answer="true">Scooby Doo</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>This leader of the Decepticons is the villain in the Transformers series.</Prompt>
+		<Response>Optimus Prime</Response>
+		<Response>Ironhide</Response>
+		<Response>Bumblebee</Response>
+		<Response answer="true">Megatron</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>This cruel dictator became Chancellor of Germany in 1933 and started World War II by invading Poland.</Prompt>
+		<Response>Windston Churchill</Response>
+		<Response>Benito Mussolini</Response>
+		<Response>Saddam Hussein</Response>
+		<Response answer="true">Adolf Hitler</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>This enormous slug-like creature lived on Tatooine, where he captured Luke Skywalker and his friends.</Prompt>
+		<Response>Darth Vader</Response>
+		<Response>Boba Fett</Response>
+		<Response>Chewbacca</Response>
+		<Response answer="true">Jabba the Hutt</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>When he's not busy capturing Princess Peach, this spiky-shelled villain finds time to race go-karts against Mario and his friends.</Prompt>
+		<Response>Donkey Kong</Response>
+		<Response>Toad</Response>
+		<Response>Luigi</Response>
+		<Response answer="true">Bowser</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>In 'The Little Mermaid', this villainess steals Ariel's voice.</Prompt>
+		<Response>Scar</Response>
+		<Response>Cruella de Vil</Response>
+		<Response>Mulan</Response>
+		<Response answer="true">Ursula</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>Cruella de Vil was the main villain in this Disney classic.</Prompt>
+		<Response>Lady and the Tramp</Response>
+		<Response>The Fox and the Hound</Response>
+		<Response>Cinderella</Response>
+		<Response answer="true">One Hundred and One Dalmations</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>Before having a change of heart, this penny-pinching miser was haunted by three spirits in 'A Christmas Carol'.</Prompt>
+		<Response>Jacob Marley</Response>
+		<Response>Bob Cratchit</Response>
+		<Response>Tiny Tim</Response>
+		<Response answer="true">Ebeneezer Scrooge</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>This spiderman villain is known for his four metal tentacles.</Prompt>
+		<Response>The Green Goblin</Response>
+		<Response>The Sandman</Response>
+		<Response>Venom</Response>
+		<Response answer="true">Doctor Octopus</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>This metal-faced villain helps Cobra Commander fight against G.I. Joe.</Prompt>
+		<Response>Snake Eyes</Response>
+		<Response>Storm Shadow</Response>
+		<Response>Darth Vader</Response>
+		<Response answer="true">Destro</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>This villain in 'The Adventures of Tom Sawyer' meets a sad fate when he becomes trapped in a cave.</Prompt>
+		<Response>Huckleberry Finn</Response>
+		<Response>Aunt Polly</Response>
+		<Response>Becky Thatcher</Response>
+		<Response answer="true">Injun Joe</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>This outlaw, who was also known as William H. Bonney, had his short life ended when he met Sheriff Pat Garrett in 1881.</Prompt>
+		<Response>Baby Bill</Response>
+		<Response>Infant Ian</Response>
+		<Response>Edgar the Young</Response>
+		<Response answer="true">Billy the Kid</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>This ruthless pirate, also known as Edward Teach, frightened his enemies by tying lit fuses under his hand when going in to battle.</Prompt>
+		<Response>Yellowbeard</Response>
+		<Response>Redbeard</Response>
+		<Response>Jack Sparrow</Response>
+		<Response answer="true">Blackbeard</Response>
+	</Question>
+
+</Category>
+
+<Category name="Homophones">
+
+	<Question difficulty="1">
+		<Prompt>Uses oars to propel a boat... a type of flower</Prompt>
+		<Response>Paddle... Pattle</Response>
+		<Response>Steer... Stear</Response>
+		<Response>Carnashion... Carnation</Response>
+		<Response answer="true">Rows... Rose</Response>
+	</Question>
+
+	<Question difficulty="1">
+		<Prompt>An organ used to see... a word you'd use to refer to yourself</Prompt>
+		<Response>Nose... Knows</Response>
+		<Response>Heart... Hart</Response>
+		<Response>Mee... Me</Response>
+		<Response answer="true">Eye... I</Response>
+	</Question>
+
+	<Question difficulty="1">
+		<Prompt>Letters with postage stamps... not a girl</Prompt>
+		<Response>Cards... Kards</Response>
+		<Response>Boi... Boy</Response>
+		<Response>Mann... Man</Response>
+		<Response answer="true">Mail... Male</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>To come into contact... what you'd buy from the butcher</Prompt>
+		<Response>Flour... Flower</Response>
+		<Response>Know... No</Response>
+		<Response>Serial... Cereal</Response>
+		<Response answer="true">Meet... Meat</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>A brief rest... the hands of a dog</Prompt>
+		<Response>Tale... Tail</Response>
+		<Response>Nap... Knap</Response>
+		<Response>Fir... Fur</Response>
+		<Response answer="true">Pause... Paws</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>A person who sells food... more disgusting</Prompt>
+		<Response>Vendor... Vender</Response>
+		<Response>Cashier... Cashere</Response>
+		<Response>Pharmacist... Farmacist</Response>
+		<Response answer="true">Grocer... Grosser</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>Predicted... someone who visits</Prompt>
+		<Response>Supposed... Suppost</Response>
+		<Response>Made... Maid</Response>
+		<Response>Hour... Our</Response>
+		<Response answer="true">Guessed... Guest</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>The top of a mountain... a quick look</Prompt>
+		<Response>Glants... Glance</Response>
+		<Response>Height... Hite</Response>
+		<Response>Ceiling... Sealing</Response>
+		<Response answer="true">Peak... Peek</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>A round object... to cry loudly</Prompt>
+		<Response>Circle... Sirkle</Response>
+		<Response>Sphere... Sfeer</Response>
+		<Response>Whale... Wail</Response>
+		<Response answer="true">Ball... Bawl</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>A strong material... to take without asking</Prompt>
+		<Response>Baron... Barren</Response>
+		<Response>Wood... Would</Response>
+		<Response>Concrete... Concreat</Response>
+		<Response answer="true">Steel... Steal</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>Not crooked... a narrow body of water</Prompt>
+		<Response>Even... Eavin</Response>
+		<Response>See... Sea</Response>
+		<Response>Laik... Lake</Response>
+		<Response answer="true">Straight... Strait</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>Fruit growing on a bush... to cover with dirt</Prompt>
+		<Response>Pear... Pare</Response>
+		<Response>Tea... Tee</Response>
+		<Response>Steak... Stake</Response>
+		<Response answer="true">Berry... Bury</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>Twenty-four hour periods... to stun</Prompt>
+		<Response>Hours... Ours</Response>
+		<Response>Years... Yeers</Response>
+		<Response>Months... Munths</Response>
+		<Response answer="true">Days... Daze</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>What you need while waiting... people visiting the doctor</Prompt>
+		<Response>Tickets... Tikets</Response>
+		<Response>Feet... Feat</Response>
+		<Response>Coffers... Coughers</Response>
+		<Response answer="true">Patience... Patients</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>To let someone borrow something... with no other company</Prompt>
+		<Response>Trade... Traid</Response>
+		<Response>Board... Bored</Response>
+		<Response>Be... Bee</Response>
+		<Response answer="true">Loan... Lone</Response>
+	</Question>
+
+</Category>
+
+<Category name="Popular Trends">
+
+	<Question difficulty="1">
+		<Prompt>Pikachu and Charizard are two characters from this franchise that first became popular in the 1990s.</Prompt>
+		<Response>Ben 10</Response>
+		<Response>Magic: The Gathering</Response>
+		<Response>Dungeons and Dragons</Response>
+		<Response answer="true">Pokemon</Response>
+	</Question>
+
+	<Question difficulty="1">
+		<Prompt>Skateboarding and snowboarding are types of this activity, which became the rage in the 1990s.</Prompt>
+		<Response>Board Sports</Response>
+		<Response>Danger Sports</Response>
+		<Response>Dude Sports</Response>
+		<Response answer="true">Extreme Sports</Response>
+	</Question>
+
+	<Question difficulty="1">
+		<Prompt>Nirvana and Pearl Jam helped this musical movement take off in the 1990s.</Prompt>
+		<Response>Emo</Response>
+		<Response>Hair metal</Response>
+		<Response>Disco</Response>
+		<Response answer="true">Grunge</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>If you were a fan of 'Napoleon Dynamite', you may have worn the popular shirt that said, 'Vote for' this person.</Prompt>
+		<Response>Uncle Rico</Response>
+		<Response>Kip</Response>
+		<Response>Summer</Response>
+		<Response answer="true">Pedro</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>The holes on this popular type of footwear are perfect if you want to snap in some accessories.</Prompt>
+		<Response>Flip-flops</Response>
+		<Response>Heelys</Response>
+		<Response>Go-go boots</Response>
+		<Response answer="true">Crocs</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>Leonardo and Michelangelo are two of these popular "heroes in a half-shell."</Prompt>
+		<Response>Koopas</Response>
+		<Response>Krusty Krabs</Response>
+		<Response>Cosmic Clams</Response>
+		<Response answer="true">Teenage Mutant Ninja Turtles</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>This type of music of the 1970s included such hits as "Stayin' Alive" and "The Hustle."</Prompt>
+		<Response>Electronica</Response>
+		<Response>Hip Hop</Response>
+		<Response>Emo</Response>
+		<Response answer="true">Disco</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>Whirling this toy around your waist was one of the biggest crazes of the 1950s.</Prompt>
+		<Response>Yo-yo</Response>
+		<Response>Slinky</Response>
+		<Response>Tickle Me Elmo</Response>
+		<Response answer="true">Hula Hoop</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>In the 1950s, many girls wore skirts stitched with this type of dog.</Prompt>
+		<Response>Golden retriever</Response>
+		<Response>Chihuahua</Response>
+		<Response>Basset hound</Response>
+		<Response answer="true">Poodle</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>This popular accessory of the 1970s supposedly showed how you were feeling by changing color.</Prompt>
+		<Response>Emotion pendants</Response>
+		<Response>Feeling hats</Response>
+		<Response>Friendship bracelets</Response>
+		<Response answer="true">Mood rings</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>All the cool kids used to hang out at carhops, where waitresses would bring the food to your car while wearing these.</Prompt>
+		<Response>Heelys</Response>
+		<Response>In-line skates</Response>
+		<Response>Gorilla costumes</Response>
+		<Response answer="true">Roller skates</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>Believe it or not, many kids in the 1970s kept these as pets.</Prompt>
+		<Response>Bricks</Response>
+		<Response>Light bulbs</Response>
+		<Response>Balls of lint</Response>
+		<Response answer="true">Rocks</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>What recent fad involves people lying down in unusual locations?</Prompt>
+		<Response>Boarding</Response>
+		<Response>Flattening</Response>
+		<Response>Timbering</Response>
+		<Response answer="true">Planking</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>The object of this fad of the 1980s was to turn its rows and columns until each of its six sides was a solid color.</Prompt>
+		<Response>Majik Links</Response>
+		<Response>Rainbow Row</Response>
+		<Response>Bort's Block</Response>
+		<Response answer="true">Rubik's Cube</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>A fad of the 1950s involved groups of college students stuffing themselves into these tight spaces.</Prompt>
+		<Response>Elevators</Response>
+		<Response>Bathrooms</Response>
+		<Response>Janitors' closets</Response>
+		<Response answer="true">Phone booths</Response>
+	</Question>
+
+</Category>
+
+<Category name="The World of Poptropica">
+
+	<Question difficulty="1">
+		<Prompt>Linus, Charlie Brown, and Snoopy are characters on this island.</Prompt>
+		<Response>Red Dragon Island</Response>
+		<Response>Wild West Island</Response>
+		<Response>Astro-Knights Island</Response>
+		<Response answer="true">Great Pumpkin Island</Response>
+	</Question>
+
+	<Question difficulty="1">
+		<Prompt>You must defeat Dr. Hare on this island.</Prompt>
+		<Response>Red Dragon Island</Response>
+		<Response>Wild West Island</Response>
+		<Response>Astro-Knights Island</Response>
+		<Response answer="true">24 Carrot Island</Response>
+	</Question>
+
+	<Question difficulty="1">
+		<Prompt>You must battle pirates and sea monsters on this island.</Prompt>
+		<Response>Shark Tooth Island</Response>
+		<Response>Cryptids</Response>
+		<Response>Super Power Island</Response>
+		<Response answer="true">Skullduggery Island</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>Wearing a grass skirt will make you look like a native on this island.</Prompt>
+		<Response>Skullduggery Island</Response>
+		<Response>Time Tangled Island</Response>
+		<Response>Big Nate Island</Response>
+		<Response answer="true">Shark Tooth Island</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>You begin this island by landing on the Main Street of Dusty Gulch.</Prompt>
+		<Response>Reality TV Island</Response>
+		<Response>Mythology Island</Response>
+		<Response>Red Dragon Island</Response>
+		<Response answer="true">Wild West Island</Response>
+	</Question>
+
+	<Question difficulty="2">
+		<Prompt>If you are in Bobo's Clown Store, you must be on this island.</Prompt>
+		<Response>Cryptids Island</Response>
+		<Response>Wimpy Wonderland</Response>
+		<Response>Time Tangled Island</Response>
+		<Response answer="true">Counterfeit Island</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>Hercules charges only 10 drachmas for an autographed photo on this island.</Prompt>
+		<Response>Counterfeit Island</Response>
+		<Response>Super Power Island</Response>
+		<Response>Skullduggery Island</Response>
+		<Response answer="true">Mythology Island</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>If you find yourself in Klassic Komix, you must be on this island.</Prompt>
+		<Response>Wimpy Wonderland</Response>
+		<Response>Reality TV Island</Response>
+		<Response>Counterfeit Island</Response>
+		<Response answer="true">Big Nate Island</Response>
+	</Question>
+
+	<Question difficulty="3">
+		<Prompt>You can try your hand at Twisted Wizard on this island.</Prompt>
+		<Response>Big Nate Island</Response>
+		<Response>Astro-Knights Island</Response>
+		<Response>Time Tangled Island</Response>
+		<Response answer="true">Wimpy Wonderland</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>Criminals escape on Super Power Island when this crashes into the prison.</Prompt>
+		<Response>A rhinoceros</Response>
+		<Response>An ice cream truck</Response>
+		<Response>A tidal wave</Response>
+		<Response answer="true">A meteor</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>You must find proof of the Loch Ness Monster's existence on this island.</Prompt>
+		<Response>Red Dragon Island</Response>
+		<Response>Astro-Knights Island</Response>
+		<Response>Shark Tooth Island</Response>
+		<Response answer="true">Cryptids Island</Response>
+	</Question>
+
+	<Question difficulty="4">
+		<Prompt>You receive throwing stars and a ninja costume on this island.</Prompt>
+		<Response>Super Power Island</Response>
+		<Response>Time Tangled Island</Response>
+		<Response>Wild West Island</Response>
+		<Response answer="true">Red Dragon Island</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>This reality-TV star is hiding out in a motel on Reality TV Island.</Prompt>
+		<Response>Jackie Swanson</Response>
+		<Response>Libby Benson</Response>
+		<Response>Snooki</Response>
+		<Response answer="true">Bucky Lucas</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>You must reach the peak of this mountain on Time Tangled Island.</Prompt>
+		<Response>Mt. Fuji</Response>
+		<Response>Mt. Rushmore</Response>
+		<Response>Mt. Vesuvius</Response>
+		<Response answer="true">Mt. Everest</Response>
+	</Question>
+
+	<Question difficulty="5">
+		<Prompt>You must save this kingdom on Astro-Knights Island.</Prompt>
+		<Response>Camelot</Response>
+		<Response>Avalon</Response>
+		<Response>Excalibur</Response>
+		<Response answer="true">Arturus</Response>
+	</Question>
+
+</Category>
+
+<FinalCategory name="Art">
+
+	<Question>
+		<Prompt>This Renaissance Man Painted 'The Mona Lisa' and also drew sketches of an early flying machine.</Prompt>
+		<Response>Michelangelo</Response>
+		<Response>Donatello</Response>
+		<Response>Raphael</Response>
+		<Response>Machiavelli</Response>
+		<Response>Botticelli</Response>
+		<Response answer="true">Leonardo Da Vinci</Response>
+	</Question>
+
+</FinalCategory>
+
+
+<FinalCategory name="Inventors">
+
+	<Question>
+		<Prompt>Alexander Graham Bell is best known for this invention.</Prompt>
+		<Response>the light bulb</Response>
+		<Response>the airplane</Response>
+		<Response>the automobile</Response>
+		<Response>the Snuggie</Response>
+		<Response>the saying, "It is what it is."</Response>
+		<Response answer="true">the telephone</Response>
+	</Question>
+
+</FinalCategory>
+
+
+<FinalCategory name="The United States">
+
+	<Question>
+		<Prompt>This is the newest of the 50 U.S. states.</Prompt>
+		<Response>Alaska</Response>
+		<Response>Texas</Response>
+		<Response>Rhode Island</Response>
+		<Response>California</Response>
+		<Response>Florida</Response>
+		<Response answer="true">Hawaii</Response>
+	</Question>
+
+</FinalCategory>
+
+
+<FinalCategory name="Ancient Civilizations">
+
+	<Question>
+		<Prompt>Sparta and Athens were city-states in this present day nation.</Prompt>
+		<Response>Russia</Response>
+		<Response>Germany</Response>
+		<Response>Italy</Response>
+		<Response>France</Response>
+		<Response>India</Response>
+		<Response answer="true">Greece</Response>
+	</Question>
+
+</FinalCategory>
+
+
+<FinalCategory name="Word Meanings">
+
+	<Question>
+		<Prompt>Hydrophobia refers to the fear of this.</Prompt>
+		<Response>Snakes</Response>
+		<Response>Spiders</Response>
+		<Response>Air</Response>
+		<Response>Clowns</Response>
+		<Response>The Dark</Response>
+		<Response answer="true">Water</Response>
+	</Question>
+
+</FinalCategory>
+
+
+<FinalCategory name="Geography">
+
+	<Question>
+		<Prompt>The Pacific and Atlantic oceans are connected by a canal stretching across this Central American country.</Prompt>
+		<Response>Belize</Response>
+		<Response>Nicaragua</Response>
+		<Response>El Salvador</Response>
+		<Response>Costa Rica</Response>
+		<Response>Honduras</Response>
+		<Response answer="true">Panama</Response>
+	</Question>
+
+</FinalCategory>
+
+</Quiz>
