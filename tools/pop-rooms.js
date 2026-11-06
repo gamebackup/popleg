@@ -1,5 +1,6 @@
 /*
-   Follow-up to pop-sweep.js: the six islands that need an explicit room.
+   Focused re-check of the six islands that need an explicit room - the same rooms
+   pop-sweep.js now takes from config.xml, probed one by one.
 
    Three have no <Island>Main scene but are reached through the travel map with a
    room (Early/City2, Shark/Mainstreet, Time/Present). Three have no entry scene at

@@ -77,7 +77,7 @@
 
         @font-face {
             font-family: "Billy Serif";
-            src: url(flashpoint/billySerif.ttf) format("truetype");
+            src: url(assets/flashpoint/billySerif.ttf) format("truetype");
         }
     </style>
 </head>
@@ -187,6 +187,9 @@ const errorText = document.getElementById("errorText"),
     // a scene reaches one it has not met yet - which is exactly what happened with
     // get_mem_status.php and get_island_info.php.
     const ANSWERS = {
+        // Telemetry (brain//track.php) is a fire-and-forget beacon; the mirror has no
+        // use for it. Empty, the way sw.js answers it, so the call never leaves the page.
+        "track.php": "",
         // Empty, not ".": the client concatenates this straight onto paths like
         // "images//flags/flag-index.txt", so a dot turns them into ".images/..." and
         // every one of them 404s. Empty keeps them relative, which resolves beside
@@ -238,7 +241,7 @@ const errorText = document.getElementById("errorText"),
     const GENERIC = "ok=1&success=1";
 
     // These names belong to sw.js, which answers them from IndexedDB: the account
-    // routes are the local account backend and track.php is its telemetry route.
+    // routes are the local account backend.
     // Shadowing one here would break sign-in or persistence, so they are the only
     // .php paths that must reach the worker.
     const WORKER_OWNS = {
@@ -247,7 +250,6 @@ const errorText = document.getElementById("errorText"),
         "register.php": 1,
         "reguser.php": 1,
         "status.php": 1,
-        "track.php": 1,
         "__pop_accounts.php": 1,
         "__pop_import_accounts.php": 1,
         "__pop_delete_account.php": 1,
@@ -305,6 +307,20 @@ const errorText = document.getElementById("errorText"),
 
         // Served by the page, not the bucket: tools/check-assets.js fetches it.
         if (rel === "assets.json") return null;
+
+        /*
+           The map popup is named after the island ("popups/maps/West.swf"), and it is
+           built from the client's current island. A common room belongs to no island,
+           so that value is empty and the request becomes "popups/maps/undefined.swf" -
+           a 404 the player sees as a broken map button. Point it at the island this
+           page was started for, which is where the room actually lives.
+        */
+        if (rel === "popups/maps/undefined.swf") {
+            const island = activeIsland || ((getLastScene() || {}).island || "");
+
+            if (island && island !== "Home")
+                return ASSET_ROOT.href + "popups/maps/" + island + ".swf";
+        }
 
         const slash = rel.indexOf("/"),
               first = slash === -1 ? rel : rel.slice(0, slash);
@@ -865,18 +881,11 @@ function flashpointLoad(island, scene, path = PATH_DEFAULT) {
             } else {
                 pageState = STATE_SCENE;
 
-                // Mostly detects "{island}Common" scenes, but also Early Poptropica's
-                // "Common" scene and Red Dragon Island's "LibraryCommon" scene.
-                if (!scene.endsWith("Common")) {
-                    const SPECIAL_COMMONS = [ "Coconut", "Party", "Cinema", "News", "HairClub", "Airlines",
-                                              "Saltys", "Crop", "BaguetteInn", "Billiards", "MidasGym",
-                                              "BrokenBarrel", "HotelInterior", "ClubInterior" ];
-
-                    // Wimpy Boardwalk Island has a normal scene named "Arcade".
-                    if (!(SPECIAL_COMMONS.includes(scene) || scene === "Arcade" && island === "Early")) {
-                        break;
-                    }
-                }
+                // Common rooms are multiplayer places; this mirror answers their
+                // endpoints but has no other players. Wimpy Boardwalk Island also has
+                // a normal scene named "Arcade", which is not a common room.
+                if (!isCommonScene(scene) && !(scene === "Arcade" && island === "Early"))
+                    break;
 
                 errorText.hidden = false;
             }
@@ -997,17 +1006,10 @@ function loadFPStart(extraMenuSrc, width, height, flashvars) {
     };
 
     window.returnUserAccept = function () {
-        let island = "Early",
-            scene = "City2";
-        const lastScene = getLastScene();
-
-        if (lastScene) {
-            island = lastScene.island;
-            scene = lastScene.scene;
-        }
+        const target = resumeScene(getLastScene());
 
         finalize();
-        POSTToBase(scene, island, PATH_DEFAULT);
+        POSTToBase(target.scene, target.island, PATH_DEFAULT);
     };
 
     window.newUserReject = window.returnUserReject = function () {
@@ -1137,6 +1139,38 @@ function getLastScene() {
     } catch (err) { }
 
     return null;
+}
+
+/*
+   A common room is somewhere you visit, not somewhere to resume. Recording one as the
+   last scene meant "Returning Player" restored the room the player had just left - and
+   because leaving a common room returns to the Home menu, that read as being stuck in
+   it: leave, menu, returning player, same room. Resume at the island's entry scene.
+*/
+const COMMON_SCENES = [ "Coconut", "Party", "Cinema", "News", "HairClub", "Airlines",
+                        "Saltys", "Crop", "BaguetteInn", "Billiards", "MidasGym",
+                        "BrokenBarrel", "HotelInterior", "ClubInterior" ];
+
+function isCommonScene(scene) {
+    return scene === SCENE_FP_START || scene.endsWith("Common") ||
+           COMMON_SCENES.indexOf(scene) !== -1;
+}
+
+function resumeScene(lastScene) {
+    const fresh = { island: "Early", scene: "City2" };   // the new-user menu destination
+
+    if (!lastScene || typeof lastScene.island !== "string" || !lastScene.island)
+        return fresh;
+
+    if (lastScene.island === "Home")
+        return fresh;
+
+    // Early Poptropica's entry scene is City2; every other island uses "<Island>Main".
+    if (!lastScene.scene || isCommonScene(lastScene.scene))
+        return { island: lastScene.island,
+                 scene: lastScene.island === "Early" ? "City2" : lastScene.island + "Main" };
+
+    return { island: lastScene.island, scene: lastScene.scene };
 }
 
 function getCookieFlag(name, defaultValue) { // Returns true if flag is ENABLED
