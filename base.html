@@ -5,8 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Poptropica: Legacy</title>
     <link rel="icon" href="data:,">
-    <script>window.RufflePlayer = window.RufflePlayer || {}; window.RufflePlayer.config = { quality: "low" };</script>
-    <script src="../../ruffle/ruffle.js"></script>
+    <script>
+        // Relative paths inside the SWF resolve against the page, where the fetch/XHR
+        // layer retargets media onto ASSET_ROOT; navigation targets stay on this host.
+        window.RufflePlayer = window.RufflePlayer || {};
+        window.RufflePlayer.config = { quality: "low", base: new URL(".", location.href).href };
+    </script>
+    <script src="ruffle/ruffle.js"></script>
     <style>
         body, embed, ruffle-player, ruffle-embed { background-color: #139ffd; }
         body { margin: 0; width: 100vw; height: 100vh; overflow: hidden; }
@@ -119,6 +124,26 @@
 */
 "use strict";
 
+/*
+   Where the game's media lives - scenes, popups, framework, avatar parts and the
+   root player SWFs, all under assets/ beside this page. GitHub Pages serves that
+   tree from the same origin as the page.
+
+   ?assetbase=... in the page URL overrides the root, which is handy for testing a
+   copy somewhere else without touching this file.
+*/
+const ASSET_OVERRIDE = new URLSearchParams(location.search).get("assetbase");
+
+const ASSET_ROOT = new URL(
+    String(ASSET_OVERRIDE || window.POP_ASSET_BASE || "assets/").replace(/\/*$/, "/"),
+    location.href
+);
+
+function assetURL(rel) { return ASSET_ROOT.href + rel; }
+
+// tools/check-assets.js probes this instead of the page folder.
+window.POP_ASSET_ROOT = ASSET_ROOT.href;
+
 const SCENE_FP_RESTART = "FlashpointIslandRestart",
       SCENE_FP_START = "Home";
 
@@ -128,9 +153,9 @@ const STATE_SCENE = 0,
       STATE_FP_START = 3,
       STATE_FP_CREATE = 4;
 
-// Relative, not root-absolute: this mirror is served from a subdirectory.
+// The player and its state movies live with the media, not on the page's host.
 const SWF_STATES = [ "framework.swf", "flashpoint/adSkip.swf", "flashpoint/restartIsland.swf",
-                     "flashpoint/saveData.swf", "flashpoint/createUser.swf" ];
+                     "flashpoint/saveData.swf", "flashpoint/createUser.swf" ].map(assetURL);
 
 const COOKIE_ADS = "ads",
       COOKIE_CHARS = "charLazyLoad",
@@ -248,9 +273,9 @@ const errorText = document.getElementById("errorText"),
 
     // Root-level files the client builds as prefix + "/" + name. The framework starts a
     // movie that way from its startup_path flashvar, so an empty prefix asks the origin
-    // for "/gameplay.swf" instead of the copy beside the page. Only these extensions
-    // are rebased, so an unrelated site-root request is never pulled into the folder.
-    const GAME_FILE = /\.(swf|xml|txt|json|htm|html)$/i;
+    // for "/gameplay.swf" instead of the copy beside the page. Only media extensions
+    // are retargeted: .htm/.html are navigation targets and stay with the page.
+    const ASSET_FILE = /\.(swf|xml|txt|json)$/i;
 
     function phpBody(pathname) {
         const name = pathname.split("/").pop();
@@ -263,19 +288,31 @@ const errorText = document.getElementById("errorText"),
         return Object.prototype.hasOwnProperty.call(ANSWERS, name) ? ANSWERS[name] : GENERIC;
     }
 
-    // Null unless the path really is game content, so a genuine site-root asset is
-    // never redirected by accident.
+    /*
+       Media arrives in one of two shapes: relative to the page the client was started
+       from ("<page>/scenes/islandEarly/sceneMain.swf") or root-absolute when it has lost
+       its base ("/framework/data/config.xml", "/gameplay.swf"). Both are game content
+       and both belong on ASSET_ROOT now. Page targets such as /base.html and /home.htm
+       are deliberately not matched, so navigation stays on whichever host serves the
+       page. Null means "leave it alone".
+    */
     function rebase(pathname) {
-        if (folder.length <= 1 || pathname.indexOf(folder) === 0) return null;
+        if (pathname.indexOf(ASSET_ROOT.pathname) === 0) return null;   // already retargeted
 
-        const rel = pathname.replace(/^\/+/, ""),
-              slash = rel.indexOf("/"),
+        const rel = pathname.indexOf(folder) === 0
+                  ? pathname.slice(folder.length)
+                  : pathname.replace(/^\/+/, "");
+
+        // Served by the page, not the bucket: tools/check-assets.js fetches it.
+        if (rel === "assets.json") return null;
+
+        const slash = rel.indexOf("/"),
               first = slash === -1 ? rel : rel.slice(0, slash);
 
-        // A bare file: "/gameplay.swf", "/char.swf", "/home.htm".
-        if (slash === -1) return GAME_FILE.test(first) ? folder + rel : null;
+        // A bare file: "/gameplay.swf", "/char.swf", "/pop_home.swf".
+        if (slash === -1) return ASSET_FILE.test(first) ? ASSET_ROOT.href + rel : null;
 
-        return GAME_DIRS.indexOf(first) === -1 ? null : folder + rel;
+        return GAME_DIRS.indexOf(first) === -1 ? null : ASSET_ROOT.href + rel;
     }
 
     /*
@@ -517,6 +554,11 @@ const errorText = document.getElementById("errorText"),
                     // Keep the query: those island links carry ?island=...&room=...
                     if (target !== url.pathname) return realFetch(target + url.search, init);
                 }
+            } else if (url.origin === ASSET_ROOT.origin) {
+                // The client built an absolute media URL itself; only the scene repair
+                // still applies, and only when the name is one the map knows.
+                const fixed = repairScene(url.href);
+                if (fixed && fixed !== url.href) return realFetch(fixed, init);
             }
         } catch (err) { }
 
@@ -553,6 +595,11 @@ const errorText = document.getElementById("errorText"),
 
                         if (target !== abs.pathname) args[1] = target + abs.search;   // keep ?island=...&room=...
                     }
+                } else if (abs.origin === ASSET_ROOT.origin) {
+                    delete this.__popBody;
+
+                    const fixed = repairScene(abs.href);
+                    if (fixed && fixed !== abs.href) args[1] = fixed;
                 }
             } catch (err) { }
 

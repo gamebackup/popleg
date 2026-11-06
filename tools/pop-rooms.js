@@ -8,7 +8,7 @@
    itself renders.
 
    Run from the console on the game page:
-       fetch('../../tools/pop-rooms.js').then(r => r.text()).then(eval)
+       fetch('tools/pop-rooms.js').then(r => r.text()).then(eval)
    or paste this file. Keep the tab in front.
 */
 (async () => {

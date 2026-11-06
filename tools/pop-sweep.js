@@ -3,7 +3,7 @@
 
    Open the game page first (local or deployed), then either paste this whole file
    into devtools, or from the same origin run:
-       fetch('../../tools/pop-sweep.js').then(r => r.text()).then(eval)
+       fetch('tools/pop-sweep.js').then(r => r.text()).then(eval)
 
    It loads each island in an offscreen iframe, one at a time, and waits until that
    frame actually requests its scene SWF. Keep the tab visible and in front: browsers

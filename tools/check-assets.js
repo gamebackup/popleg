@@ -3,7 +3,7 @@
 
     Paste it into the browser console while the game page is open:
 
-        fetch('../../tools/check-assets.js').then(r => r.text()).then(eval)
+        fetch('tools/check-assets.js').then(r => r.text()).then(eval)
 
     or paste this whole file. It reads assets.json from the game folder, requests every
     listed file, and prints what is missing - the result is also copied to the clipboard
@@ -15,7 +15,8 @@
     ~4,800 requests and takes a few minutes.
 */
 (async function checkAssets() {
-    const dir = new URL("./", location.href);
+    // The page publishes its media root; by default that is assets/ beside the page.
+    const dir = new URL(window.POP_ASSET_ROOT || "./", location.href);
     const wantAll = location.hash.indexOf("all") > -1 || window.POP_CHECK_ALL === true;
 
     let manifest;
