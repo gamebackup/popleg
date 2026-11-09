@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Poptropica room sweep</title>
+<style>
+    body { margin: 24px; font: 13px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace;
+           color: #d8e6f3; background: #0b1a2a; }
+    h1 { font-size: 16px; margin: 0 0 12px; }
+    pre { margin: 0; white-space: pre-wrap; }
+    .bad { color: #ffb4a8; }
+</style>
+</head>
+<body>
+<h1>Poptropica room sweep</h1>
+<pre id="status">waiting…</pre>
+<script>
+/*
+    Runs tools/pop-scenes.js in small chunks, then reloads the page. A room boots a
+    whole Ruffle instance, and the browser does not give all of that memory back
+    promptly; reloading keeps a long sweep from exhausting the tab.
+
+    Open this page as /sweep.html?run=1. Progress is the same localStorage entry the
+    console tool uses, so this resumes wherever a previous run stopped. A lock stops
+    a second tab from running the same sweep at the same time.
+
+    One chunk is one iframe at a time. Increase CHUNK only after watching memory.
+*/
+(async () => {
+    const CHUNK = 8;
+    const MAX_RUNS = 220;
+    const KEY = "pop-scenes:/";
+    const LOCK = "pop-scenes-lock";
+    const RUNS = "pop-scenes-runs";
+    const SUMMARY = "pop-scenes-summary";
+    const status = document.getElementById("status");
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    const say = text => { status.textContent = text; };
+
+    function rows() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(KEY) || "null");
+            return saved && Array.isArray(saved.rows) ? saved.rows : [];
+        } catch (err) { return []; }
+    }
+
+    const params = new URLSearchParams(location.search);
+    if (params.get("run") !== "1") {
+        say("Add ?run=1 to the URL to start.\nSaved rooms: " + rows().length);
+        return;
+    }
+
+    const done = localStorage.getItem(SUMMARY);
+    if (done) {
+        say("Sweep already finished.\n\n" + done);
+        return;
+    }
+
+    const before = rows();
+    const runs = (parseInt(localStorage.getItem(RUNS), 10) || 0) + 1;
+    localStorage.setItem(RUNS, String(runs));
+
+    if (runs > MAX_RUNS) {
+        say("Stopped after " + MAX_RUNS + " reloads. " + before.length + " rooms saved.\n" +
+            "Open a fresh tab with ?run=1 after checking the page.");
+        return;
+    }
+
+    // Claim the sweep. A second tab that opens at the same moment will lose the
+    // owner check below instead of starting a competing iframe.
+    const owner = Date.now() + ":" + Math.random().toString(36).slice(2);
+    localStorage.setItem(LOCK, JSON.stringify({ owner: owner, at: Date.now() }));
+
+    await sleep(150);
+
+    let lock = null;
+    try { lock = JSON.parse(localStorage.getItem(LOCK) || "null"); } catch (err) { }
+    if (!lock || lock.owner !== owner) {
+        say("Another sweep tab owns the lock; this one is idle.");
+        return;
+    }
+
+    const heartbeat = setInterval(() => {
+        localStorage.setItem(LOCK, JSON.stringify({ owner: owner, at: Date.now() }));
+    }, 5000);
+
+    function release() {
+        clearInterval(heartbeat);
+        try {
+            const now = JSON.parse(localStorage.getItem(LOCK) || "null");
+            if (!now || now.owner === owner) localStorage.removeItem(LOCK);
+        } catch (err) { }
+    }
+
+    window.addEventListener("pagehide", release);
+
+    window.__popScenesChunk = 2;
+    window.__popScenesRooms = CHUNK;
+
+    say("run " + runs + " · " + before.length + " rooms already saved · probing " +
+        CHUNK + " more, one at a time");
+
+    let result;
+
+    try {
+        result = await fetch("tools/pop-scenes.js", { cache: "no-cache" })
+            .then(r => { if (!r.ok) throw new Error(r.status + " tools/pop-scenes.js"); return r.text(); })
+            .then(eval);
+    } catch (err) {
+        release();
+        say("Sweep error after " + before.length + " saved rooms:\n" + (err && err.message || err));
+        return;
+    }
+
+    release();
+
+    const after = rows();
+
+    if (result && result.rooms) {
+        localStorage.setItem(SUMMARY, JSON.stringify(result, null, 1));
+        try { localStorage.removeItem(RUNS); } catch (err) { }
+        say("Finished: " + result.rooms + " rooms · ok " + result.ok +
+            " · failed " + result.failed.length + " · no scene " + result.noScene.length +
+            " · wrong scene " + result.wrong.length + "\n\n" + JSON.stringify(result, null, 1));
+        return;
+    }
+
+    if (after.length <= before.length && after.length) {
+        say("No progress this run (" + after.length + " saved). Stopping instead of reloading.\n" +
+            "The last room may have wedged the page; reload once and retry.");
+        return;
+    }
+
+    say("run " + runs + " done · " + after.length + " rooms saved · reloading to release memory");
+    await sleep(400);
+    location.reload();
+})();
+</script>
+</body>
+</html>
