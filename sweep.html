@@ -27,8 +27,8 @@
     One chunk is one iframe at a time. Increase CHUNK only after watching memory.
 */
 (async () => {
-    const CHUNK = 8;
-    const MAX_RUNS = 220;
+    const CHUNK = 1;
+    const MAX_RUNS = 1000;
     const KEY = "pop-scenes:/";
     const LOCK = "pop-scenes-lock";
     const RUNS = "pop-scenes-runs";
@@ -126,14 +126,16 @@
         return;
     }
 
-    if (after.length <= before.length && after.length) {
+    // A shrinking row set is the ad-clip filter dropping rows saved by older runs,
+    // not a wedge; only an unchanged set means this run added nothing.
+    if (after.length === before.length && after.length) {
         say("No progress this run (" + after.length + " saved). Stopping instead of reloading.\n" +
             "The last room may have wedged the page; reload once and retry.");
         return;
     }
 
     say("run " + runs + " done · " + after.length + " rooms saved · reloading to release memory");
-    await sleep(400);
+    await sleep(3000);
     location.reload();
 })();
 </script>

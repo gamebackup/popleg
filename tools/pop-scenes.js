@@ -12,7 +12,7 @@
    travel map would.
 
    It is slow by nature: each room boots its own Ruffle instance, about 10-15s, and
-   there are 775 of them - a full pass is roughly 2.5 hours. So it runs two islands
+   there are hundreds of them - a full pass takes hours. So it runs two islands
    (and at most ROOM_CAP rooms) per invocation and saves every finished room:
 
        fetch('tools/pop-scenes.js').then(r => r.text()).then(eval)
@@ -63,6 +63,13 @@
     } catch (err) {}
   }
 
+  // Drop ad clips saved by earlier runs so the next write uses the corrected inventory.
+  if (!only && Array.isArray(progress.rows)) {
+    progress.rows = progress.rows.filter(function (row) {
+      return row && !/^AdGround/i.test(String(row.room || ""));
+    });
+  }
+
   /*
      assets.json is the deployment's own file list, so the inventory cannot drift from
      what is actually served. Only "scene<Name>.swf" files are rooms: the bare clips
@@ -81,6 +88,9 @@
       if (!m) return;
 
       const island = m[1].replace(/^island/i, ""), room = m[2].replace(/^scene/i, "");
+
+      // AdGroundH* are ad clips, not rooms; opening one as a room only yields NO SCENE.
+      if (/^AdGround/i.test(room)) return;
 
       (byIsland[island] = byIsland[island] || []).push(room);
     });

@@ -35,6 +35,14 @@
         }
         #fsBtn:hover { background: #0a5aa8; }
 
+        #mapBtn {
+            position: fixed; left: 10px; top: 10px; z-index: 10;
+            font: 12px/1.4 system-ui, sans-serif; padding: 5px 9px;
+            color: #fff; background: #0b6fd0; border: 1px solid #5fb4f5;
+            border-radius: 4px; cursor: pointer;
+        }
+        #mapBtn:hover { background: #0a5aa8; }
+
         #accountsPanel {
             position: fixed; right: 10px; bottom: 46px; z-index: 11;
             width: 240px; max-height: 50vh; overflow: auto;
@@ -86,6 +94,7 @@
 
     <button id="accountsBtn" type="button">Accounts</button>
     <button id="fsBtn" type="button">Fullscreen</button>
+    <button id="mapBtn" type="button" title="Back to the island map">Map</button>
     <div id="accountsPanel" tabindex="-1" hidden>
         <h2>Local accounts<span>saved in this browser only</span></h2>
         <div id="accountsSave"></div>
@@ -100,6 +109,19 @@
         <div id="accountsNote"></div>
         <button id="accountsClose" type="button">Close</button>
     </div>
+    <script>
+    (function () {
+        const mapBtn = document.getElementById("mapBtn");
+        if (!mapBtn) return;
+
+        mapBtn.addEventListener("click", function () {
+            // The map lives beside base.html at the root; the legacy directory
+            // aliases (base.php/index.html) sit one level below it.
+            const nestedPhpPage = /\/[^/]+\.php\/(?:index\.html)?$/.test(location.pathname);
+            location.assign(nestedPhpPage ? "../index.html" : "index.html");
+        });
+    })();
+    </script>
     <script>
 /*
     Static port of the curation's base.php.
@@ -202,6 +224,10 @@ const errorText = document.getElementById("errorText"),
         // path; it is kept for the callers that read that field instead.
         "status.php": "answer=ok&status_ok=1&success=1&ok=1",
 
+        // Fallback for a page with no local account yet. phpBody() swaps in the
+        // active account's free state when the account panel has toggled it.
+        "get_mem_status.php": "status=ok&memstatus=active-renew&mem_status=active-renew&memdate=01/01/2099&member=1&isMember=1&success=1&ok=1",
+
         "get_campaign_list.php": "ok=1&success=1",
         "visit_scene.php": "ok=1&success=1",
 
@@ -253,7 +279,8 @@ const errorText = document.getElementById("errorText"),
         "__pop_accounts.php": 1,
         "__pop_import_accounts.php": 1,
         "__pop_delete_account.php": 1,
-        "__pop_set_char.php": 1
+        "__pop_set_char.php": 1,
+        "__pop_set_membership.php": 1
     };
 
     function answer(body) {
@@ -286,6 +313,15 @@ const errorText = document.getElementById("errorText"),
         // timestamp ("for(_loc1_ in receiver) islandTimes[island].end = _loc1_"), so a
         // named flag like ok=1 becomes a bogus clock reading.
         if (name === "time.php") return Math.floor(Date.now() / 1000) + "=";
+
+        // A free account must stay free when the store refreshes membership. The
+        // worker cannot read localStorage, so the page answers this one itself.
+        if (name === "get_mem_status.php") {
+            try {
+                if (localStorage.getItem("pop.memberActive") === "0")
+                    return "status=ok&memstatus=0&mem_status=0&memdate=0&member=0&isMember=0&success=1&ok=1";
+            } catch (err) { }
+        }
 
         return Object.prototype.hasOwnProperty.call(ANSWERS, name) ? ANSWERS[name] : GENERIC;
     }
@@ -1422,7 +1458,9 @@ window.popAccounts = function () {
     const PENDING_LOGIN = "pop.pendingLogin",
           PENDING_CHAR = "pop.pendingChar",
           ACTIVE_ACCOUNT = "pop.activeAccount",
-          LOOK_BACKUP = "pop.lookBackup";
+          LOOK_BACKUP = "pop.lookBackup",
+          MEMBER_STATUS = "active-renew",
+          MEMBER_DATE = "01/01/2099";
 
     /*
        Applied on the next load from main(), before the game mounts: swaps only the
@@ -1528,9 +1566,21 @@ window.popAccounts = function () {
 
             // Gender belongs in this check: a save the character creator left without a
             // valid one makes the client raise lostlook.swf over the island, so heal it.
-            if (state.login === login && state.Registred === true && state.gender === gender) return false;
+            let member = true;
+            try { member = localStorage.getItem("pop.memberActive") !== "0"; } catch (err) { }
 
-            writeChar(Object.assign({}, state, { login: login, Registred: true }));
+            const memStatus = member ? MEMBER_STATUS : "0",
+                  memDate = member ? MEMBER_DATE : "0";
+
+            if (state.login === login && state.Registred === true && state.gender === gender &&
+                state.mem_status === memStatus && state.mem_date === memDate) return false;
+
+            writeChar(Object.assign({}, state, {
+                login: login,
+                Registred: true,
+                mem_status: memStatus,
+                mem_date: memDate
+            }));
 
             try { localStorage.setItem(ACTIVE_ACCOUNT, login); } catch (err) { }
 
@@ -1561,6 +1611,8 @@ window.popAccounts = function () {
             const state = Object.assign({}, DEFAULT_LOOK, {
                 login: String(login || "player"),
                 Registred: false,
+                mem_status: MEMBER_STATUS,
+                mem_date: MEMBER_DATE,
                 visited: "0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"
             });
 
@@ -1661,6 +1713,7 @@ window.popAccounts = function () {
             localStorage.setItem("pop.charBackup", localStorage.getItem(key));
             localStorage.setItem(PENDING_LOGIN, account.username);
             localStorage.setItem(PENDING_CHAR, JSON.stringify(avatar));
+            localStorage.setItem("pop.memberActive", account.member === false ? "0" : "1");
         } catch (err) {
             setNote("Could not queue the character rename.", true);
             return;
@@ -1668,6 +1721,33 @@ window.popAccounts = function () {
 
         setNote("Loading the island as " + account.username + "...");
         location.reload();
+    }
+
+    async function setMembership(account, makeMember) {
+        try {
+            const res = await fetch("__pop_set_membership.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({
+                    username: account.username,
+                    member: makeMember ? "1" : "0"
+                }).toString()
+            });
+            const result = await res.json();
+            if (!result.ok) throw new Error(result.error || "membership update failed");
+        } catch (err) {
+            setNote("Could not update membership: " + (err.message || err), true);
+            return;
+        }
+
+        if (activeAccount() === account.username) {
+            try { localStorage.setItem("pop.memberActive", makeMember ? "1" : "0"); } catch (err) { }
+            setNote("Reloading with " + (makeMember ? "member" : "free") + " status...");
+            location.reload();
+            return;
+        }
+
+        await refresh();
     }
 
     window.popBuildLso = buildLso;
@@ -1687,11 +1767,13 @@ window.popAccounts = function () {
               name = document.createElement("b"),
               info = document.createElement("i"),
               play = document.createElement("button"),
+              member = document.createElement("button"),
               del = document.createElement("button");
 
         name.textContent = account.username +
                            (activeAccount() === account.username ? " \u00b7 playing" : "");
-        info.textContent = (account.credits || "0") + "c";
+        info.textContent = (account.credits || "0") + "c \u00b7 " +
+                           (account.member === false ? "free" : "member");
 
         play.type = "button";
         play.textContent = "play";
@@ -1699,6 +1781,16 @@ window.popAccounts = function () {
         play.addEventListener("click", function () {
             play.disabled = true;
             playAs(account);
+        });
+
+        member.type = "button";
+        member.textContent = account.member === false ? "make member" : "make free";
+        member.title = account.member === false
+            ? "Make " + account.username + " a member"
+            : "Make " + account.username + " a free account";
+        member.addEventListener("click", function () {
+            member.disabled = true;
+            setMembership(account, account.member === false);
         });
 
         del.type = "button";
@@ -1715,7 +1807,7 @@ window.popAccounts = function () {
             await refresh();
         });
 
-        li.append(name, info, play, del);
+        li.append(name, info, play, member, del);
         return li;
     }
 

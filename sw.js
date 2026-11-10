@@ -106,6 +106,10 @@ const ENDPOINTS = {
         if (rec.pass_hash && pass && rec.pass_hash !== pass)
             return formResponse({ error: "wrongpass" });
 
+        const member = rec.member !== false,
+              memStatus = member ? "active-renew" : "0",
+              memDate = member ? "01/01/2099" : "0";
+
         const payload = {
             ok: 1,
             success: 1,
@@ -115,9 +119,13 @@ const ENDPOINTS = {
             age: rec.age || "",
             look: rec.look || "",
             credits: rec.credits || "75",
-            mem_status: "0",
-            memstatus: "0",
-            mem_date: "0",
+            // The client checks for these exact strings, not a boolean. The
+            // account panel can make an account free for testing.
+            mem_status: memStatus,
+            memstatus: memStatus,
+            mem_date: memDate,
+            member: member ? "1" : "0",
+            isMember: member ? "1" : "0",
             parent_email: "",
             has_parent_email: "0",
             Registred: "1",
@@ -149,9 +157,11 @@ const ENDPOINTS = {
             username: username,
             dbid: newDbId(),
             credits: "75",
+            member: true,
             created: Date.now()
         };
 
+        if (rec.member === undefined) rec.member = true;
         rec.fname = p.fname || p.firstName || rec.fname || "";
         rec.lname = p.lname || p.lastName || rec.lname || "";
         rec.look = p.look || p.char || p.avatar || rec.look || "";
@@ -180,6 +190,7 @@ const ENDPOINTS = {
             pass_hash: pass,
             dbid: newDbId(),
             credits: "75",
+            member: true,
             gender: p.gender || "M",
             look: p.look || p.char || "",
             created: Date.now()
@@ -220,6 +231,7 @@ const ENDPOINTS = {
                 pass_hash: rec.pass_hash || "",
                 dbid: rec.dbid || newDbId(),
                 credits: rec.credits || "75",
+                member: rec.member !== false,
                 gender: rec.gender || "M",
                 age: rec.age || "",
                 look: rec.look || "",
@@ -264,6 +276,22 @@ const ENDPOINTS = {
         await putAccount(rec);
 
         return jsonResponse({ ok: 1, username: username });
+    },
+
+    /* Local-only test switch: make one account a member or a free account. */
+    async "__pop_set_membership.php"(p) {
+        const username = (p.username || "").trim().toLowerCase();
+        if (!username)
+            return jsonResponse({ ok: 0, error: "noname" });
+
+        const rec = await getAccount(username);
+        if (!rec)
+            return jsonResponse({ ok: 0, error: "noname" });
+
+        rec.member = String(p.member) === "1";
+        await putAccount(rec);
+
+        return jsonResponse({ ok: 1, username: username, member: rec.member });
     },
 
     /*
@@ -327,6 +355,7 @@ const LEGACY = {
     "get_scene_photos.php": "answer=ok&json={}",
     "get_user_photos.php": "answer=ok&json={}",
     "get_island_info.php": "answer=noIslandInfo",
+    "get_mem_status.php": "status=ok&memstatus=active-renew&mem_status=active-renew&memdate=01/01/2099&member=1&isMember=1&success=1&ok=1",
     "list_finished_islands.php": "answer=ok&islands_json={}"
 };
 
