@@ -1067,6 +1067,57 @@ function mountMenu(src, width, height, flashvars) {
 }
 
 /*
+   Ruffle's player API can replace the movie without replacing the <ruffle-embed>.
+   Replacing the element while ActionScript is live is what made room changes appear
+   to hang: the old core stayed locked while the new player waited for it. Reuse the
+   live player and hand it the new URL and flashvars instead. Returns false when the
+   player API is unavailable, so the caller can fall back to a fresh mount.
+*/
+function reloadGame(src, width, height, flashvars) {
+    const player = liveMount(game);
+
+    if (!player)
+        return false;
+
+    let api = null;
+
+    try {
+        api = typeof player.ruffle === "function" ? player.ruffle() : player;
+    } catch (err) {
+        return false;
+    }
+
+    if (!api || typeof api.load !== "function")
+        return false;
+
+    player.setAttribute("width", width);
+    player.setAttribute("height", height);
+    player.style.width = `${ width }px`;
+    player.style.height = `${ height }px`;
+    stageSize.w = width;
+    stageSize.h = height;
+    fitStage();
+    placeMounts();
+
+    try {
+        const loading = api.load({
+            url: src,
+            parameters: new URLSearchParams(flashvars)
+        });
+
+        if (loading && typeof loading.catch === "function")
+            loading.catch(function (err) {
+                console.warn("[pop] in-place room load failed:", err);
+            });
+    } catch (err) {
+        console.warn("[pop] in-place room load failed:", err);
+        return false;
+    }
+
+    return true;
+}
+
+/*
     A 1010x645 island stage does not fit a narrow window, and a cropped stage puts the
     right-hand HUD out of reach. Scale the stage (and the toolbar under it) down until
     it fits, keeping the aspect ratio. Ruffle maps pointer coordinates through
@@ -1155,13 +1206,17 @@ function flashpointLoad(island, scene, path = PATH_DEFAULT) {
     if (getCharLazyLoadStatus())
         flashVars.set("charLazyLoad", "1");
 
+    const src = SWF_STATES[pageState],
+          vars = flashVars.toString();
+
     if (pageState === STATE_FP_START)
-        loadFPStart(SWF_STATES[pageState], width, height, flashVars.toString());
+        loadFPStart(src, width, height, vars);
     else {
         if (pageState === STATE_SCENE)
             sceneChange(island, scene);
 
-        mountGame(SWF_STATES[pageState], width, height, flashVars.toString());
+        if (!reloadGame(src, width, height, vars))
+            mountGame(src, width, height, vars);
     }
 }
 
@@ -1438,8 +1493,9 @@ let roomTransition = 0;
 
 /*
    The client calls POSTToBase for every room change. base.php used to submit a form
-   here, which reloaded the whole page and rebuilt Ruffle. Keep the page alive and
-   replace only the stage mount, so room transitions do not tear down the document.
+   here, which reloaded the whole page and rebuilt Ruffle. Keep the page alive and ask
+   the existing Ruffle player to load the next movie, so room transitions do not tear
+   down the document or the player.
 */
 function POSTToBase(room, island, startup_path) {
     if (!room || !island) return;
