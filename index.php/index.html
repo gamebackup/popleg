@@ -20,7 +20,7 @@
         #stage { position: absolute; transform-origin: 0 0; }
 
         #accountsBtn {
-            position: fixed; right: 10px; bottom: 10px; z-index: 10;
+            position: fixed; left: 10px; bottom: 118px; z-index: 10;
             font: 12px/1.4 system-ui, sans-serif; padding: 5px 9px;
             color: #fff; background: #0b6fd0; border: 1px solid #5fb4f5;
             border-radius: 4px; cursor: pointer;
@@ -28,20 +28,132 @@
         #accountsBtn:hover { background: #0a5aa8; }
 
         #fsBtn {
-            position: fixed; left: 10px; bottom: 10px; z-index: 10;
+            position: fixed; left: 10px; bottom: 46px; z-index: 10;
             font: 12px/1.4 system-ui, sans-serif; padding: 5px 9px;
             color: #fff; background: #0b6fd0; border: 1px solid #5fb4f5;
             border-radius: 4px; cursor: pointer;
         }
         #fsBtn:hover { background: #0a5aa8; }
 
+        #eventsBtn {
+            position: fixed; left: 10px; bottom: 154px; z-index: 10;
+            font: 12px/1.4 system-ui, sans-serif; padding: 5px 9px;
+            color: #fff; background: #0b6fd0; border: 1px solid #5fb4f5;
+            border-radius: 4px; cursor: pointer;
+        }
+        #eventsBtn:hover { background: #0a5aa8; }
+
+        #eventsPanel {
+            position: fixed; left: 10px; bottom: 230px; z-index: 11;
+            width: 250px; max-height: 60vh; overflow: auto;
+            font: 12px/1.5 system-ui, sans-serif; color: #fff;
+            background: #0a4f92; border: 1px solid #5fb4f5; border-radius: 6px;
+            padding: 10px 12px; box-shadow: 0 6px 24px rgba(0, 0, 0, .45);
+        }
+        #eventsPanel h2 { margin: 0 0 8px; font-size: 13px; font-weight: 600; }
+        #eventsPanel h2 span { display: block; font-size: 11px; font-weight: 400; opacity: .75; }
+        #eventsPanel h3 { margin: 9px 0 4px; font-size: 11px; font-weight: 600; color: #d6ecff; text-transform: uppercase; letter-spacing: .04em; }
+        #eventsPanel button {
+            display: block; width: 100%; margin: 3px 0; text-align: left;
+            font: inherit; color: #fff; background: #0b6fd0;
+            border: 1px solid #5fb4f5; border-radius: 3px; padding: 3px 7px; cursor: pointer;
+        }
+        #eventsPanel button:hover { background: #0a5aa8; }
+        .eventsNote { margin: 9px 0 6px; font-size: 11px; opacity: .75; }
+        .eventsActions { display: flex; gap: 6px; margin-top: 4px; }
+        .eventsActions button { flex: 1; text-align: center !important; margin: 0; }
+
         #mapBtn {
-            position: fixed; left: 10px; top: 10px; z-index: 10;
+            position: fixed; left: 10px; bottom: 190px; z-index: 10;
             font: 12px/1.4 system-ui, sans-serif; padding: 5px 9px;
             color: #fff; background: #0b6fd0; border: 1px solid #5fb4f5;
             border-radius: 4px; cursor: pointer;
         }
         #mapBtn:hover { background: #0a5aa8; }
+
+        #mapBackdrop {
+            position: fixed; inset: 0; z-index: 12;
+            background: rgba(0, 0, 0, .45);
+        }
+
+        #mapPanel {
+            position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            z-index: 13; width: min(760px, calc(100vw - 32px)); max-height: 82vh;
+            overflow: auto; box-sizing: border-box;
+            font: 12px/1.5 system-ui, sans-serif; color: #fff;
+            background: #0a4f92; border: 1px solid #5fb4f5; border-radius: 8px;
+            padding: 14px 16px; box-shadow: 0 12px 40px rgba(0, 0, 0, .55);
+        }
+        #mapPanel h2 { margin: 0 0 10px; font-size: 15px; font-weight: 600; }
+        #mapPanel h2 span { display: block; font-size: 11px; font-weight: 400; opacity: .75; }
+        #mapGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+        .mapCard {
+            min-height: 44px; text-align: left; font: inherit; color: #fff;
+            background: #0b6fd0; border: 1px solid #5fb4f5; border-radius: 4px;
+            padding: 6px 8px; cursor: pointer;
+        }
+        .mapCard:hover:not(:disabled) { background: #0a5aa8; }
+        .mapCard b { display: block; font-size: 12px; font-weight: 600; }
+        .mapCard span { display: block; font-size: 10px; opacity: .75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mapCard.current { outline: 2px solid #ffd166; outline-offset: 1px; }
+        .mapCard:disabled { opacity: .45; cursor: default; }
+        .mapNote { grid-column: 1 / -1; margin: 4px 0; font-size: 11px; opacity: .8; }
+        .mapActions { display: flex; gap: 6px; margin-top: 12px; }
+        .mapActions button {
+            flex: 1; font: inherit; color: #fff; background: #0b6fd0;
+            border: 1px solid #5fb4f5; border-radius: 3px; padding: 4px 8px; cursor: pointer;
+        }
+        .mapActions button:hover { background: #0a5aa8; }
+
+        #medalsBtn {
+            position: fixed; left: 10px; bottom: 82px; z-index: 10;
+            font: 12px/1.4 system-ui, sans-serif; padding: 5px 9px;
+            color: #fff; background: #0b6fd0; border: 1px solid #5fb4f5;
+            border-radius: 4px; cursor: pointer;
+        }
+        #medalsBtn:hover { background: #0a5aa8; }
+
+        #reportBugBtn {
+            position: fixed; left: 10px; bottom: 10px; z-index: 10;
+            font: 12px/1.4 system-ui, sans-serif; padding: 5px 9px;
+            color: #fff; background: #0b6fd0; border: 1px solid #5fb4f5;
+            border-radius: 4px; cursor: pointer; text-decoration: none;
+        }
+        #reportBugBtn:hover { background: #0a5aa8; }
+
+        #medalsBackdrop {
+            position: fixed; inset: 0; z-index: 12;
+            background: rgba(0, 0, 0, .45);
+        }
+
+        #medalsPanel {
+            position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            z-index: 13; width: min(640px, calc(100vw - 32px)); max-height: 82vh;
+            overflow: auto; box-sizing: border-box;
+            font: 12px/1.5 system-ui, sans-serif; color: #fff;
+            background: #0a4f92; border: 1px solid #5fb4f5; border-radius: 8px;
+            padding: 14px 16px; box-shadow: 0 12px 40px rgba(0, 0, 0, .55);
+        }
+        #medalsPanel h2 { margin: 0 0 10px; font-size: 15px; font-weight: 600; }
+        #medalsPanel h2 span { display: block; font-size: 11px; font-weight: 400; opacity: .75; }
+        #medalsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; }
+        .medalCard {
+            min-height: 44px; text-align: left; font: inherit; color: #d9ecff;
+            background: #0a3d73; border: 1px solid #2b6fae; border-radius: 4px;
+            padding: 6px 8px; cursor: pointer; opacity: .65;
+        }
+        .medalCard:hover { border-color: #7cc4ff; opacity: .9; }
+        .medalCard b { display: block; font-size: 12px; font-weight: 600; }
+        .medalCard span { display: block; font-size: 10px; opacity: .75; }
+        .medalCard.owned { opacity: 1; background: #7a5c00; border-color: #ffd166; color: #fff; }
+        .medalCard.owned b::after { content: " \2605"; color: #ffd166; }
+        .medalsNote { min-height: 16px; margin: 10px 0 0; font-size: 11px; opacity: .8; }
+        .medalsActions { display: flex; gap: 6px; margin-top: 8px; }
+        .medalsActions button {
+            flex: 1; font: inherit; color: #fff; background: #0b6fd0;
+            border: 1px solid #5fb4f5; border-radius: 3px; padding: 4px 8px; cursor: pointer;
+        }
+        .medalsActions button:hover { background: #0a5aa8; }
 
         #accountsPanel {
             position: fixed; right: 10px; bottom: 46px; z-index: 11;
@@ -94,7 +206,68 @@
 
     <button id="accountsBtn" type="button">Accounts</button>
     <button id="fsBtn" type="button">Fullscreen</button>
-    <button id="mapBtn" type="button" title="Back to the island map">Map</button>
+    <button id="eventsBtn" type="button">Events</button>
+    <div id="eventsPanel" tabindex="-1" hidden>
+        <h2>Global events<span>classic quests and minigames</span></h2>
+
+        <div class="eventsGroup">
+            <h3>Dr. Hare</h3>
+            <button type="button" data-room="GlobalDrHare_Exterior">Exterior</button>
+            <button type="button" data-room="GlobalDrHare_Interior">Interior</button>
+            <button type="button" data-room="GlobalDrHare_Maze">Maze</button>
+        </div>
+
+        <div class="eventsGroup">
+            <h3>Earth Day</h3>
+            <button type="button" data-room="GlobalEarthDay_Exterior">Exterior</button>
+            <button type="button" data-room="GlobalEarthDay_Interior">Interior</button>
+        </div>
+
+        <div class="eventsGroup">
+            <h3>Blimp Games</h3>
+            <button type="button" data-room="GlobalBlimpGame1">Game 1</button>
+            <button type="button" data-room="GlobalBlimpGame2">Game 2</button>
+            <button type="button" data-room="GlobalBlimpGame3">Game 3</button>
+            <button type="button" data-room="GlobalBlimpGame4">Game 4</button>
+            <button type="button" data-room="GlobalBlimpGame5">Game 5</button>
+        </div>
+
+        <p class="eventsNote">These use the client's Global scene path, outside the island map.</p>
+        <div class="eventsActions">
+            <button id="eventsHome" type="button">Home</button>
+            <button id="eventsClose" type="button">Close</button>
+        </div>
+    </div>
+
+    <button id="mapBtn" type="button">Map</button>
+    <div id="mapBackdrop" hidden></div>
+    <div id="mapPanel" role="dialog" aria-modal="true" aria-labelledby="mapTitle" tabindex="-1" hidden>
+        <h2 id="mapTitle">Island map<span>Choose where to play</span></h2>
+        <div id="mapGrid"><p class="mapNote">Loading islands...</p></div>
+        <div class="mapActions">
+            <button id="mapHome" type="button">Home</button>
+            <button id="mapEvents" type="button">Global events</button>
+            <button id="mapClose" type="button">Close</button>
+        </div>
+    </div>
+
+    <button id="medalsBtn" type="button">Medallions</button>
+    <a id="reportBugBtn" href="https://forms.gle/CGJNQEny3v6GPJi56"
+       target="_blank" rel="noopener noreferrer"
+       title="Found a bug in Poptropica on x3e? Report it here"
+       aria-label="Found a bug in Poptropica on x3e? Report it here">Report a bug</a>
+    <div id="medalsBackdrop" hidden></div>
+    <div id="medalsPanel" role="dialog" aria-modal="true" aria-labelledby="medalsTitle" tabindex="-1" hidden>
+        <h2 id="medalsTitle">Medallions<span id="medalsSummary">0 / 35 collected</span></h2>
+        <div id="medalsGrid"></div>
+        <p id="medalsNote" class="medalsNote"></p>
+        <div class="medalsActions">
+            <button id="medalsRefresh" type="button">Refresh</button>
+            <button id="medalsClear" type="button">Clear marks</button>
+            <button id="medalsClose" type="button">Close</button>
+        </div>
+    </div>
+
     <div id="accountsPanel" tabindex="-1" hidden>
         <h2>Local accounts<span>saved in this browser only</span></h2>
         <div id="accountsSave"></div>
@@ -109,17 +282,6 @@
         <div id="accountsNote"></div>
         <button id="accountsClose" type="button">Close</button>
     </div>
-    <script>
-    (function () {
-        const mapBtn = document.getElementById("mapBtn");
-        if (!mapBtn) return;
-
-        mapBtn.addEventListener("click", function () {
-            const nestedPhpPage = /\/[^/]+\.php\/(?:index\.html)?$/.test(location.pathname);
-            location.assign(nestedPhpPage ? "../index.html" : "index.html");
-        });
-    })();
-    </script>
     <script>
 /*
     Static port of the curation's base.php.
@@ -162,6 +324,47 @@ const ASSET_ROOT = new URL(
 function assetURL(rel) { return ASSET_ROOT.href + rel; }
 
 // tools/check-assets.js probes this instead of the page folder.
+let islandConfigPromise = null;
+
+function parseIslandConfig(text) {
+    const out = [];
+
+    for (const match of text.matchAll(/<island>([\s\S]*?)<\/island>/g)) {
+        const block = match[1],
+              get = function (tag) {
+                  const found = new RegExp("<" + tag + ">([\\s\\S]*?)</" + tag + ">").exec(block);
+                  return found ? found[1].trim() : "";
+              },
+              name = get("name");
+
+        if (name) out.push({ name: name, main: get("islandMain"),
+                             cluster: get("clusterName"), medallion: get("medallion") });
+    }
+
+    return out;
+}
+
+function loadIslandConfig() {
+    if (!islandConfigPromise) {
+        islandConfigPromise = fetch(assetURL("framework/data/config.xml"), { cache: "no-cache" })
+            .then(function (response) {
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                return response.text();
+            })
+            .then(function (text) {
+                const islands = parseIslandConfig(text);
+                if (!islands.length) throw new Error("no islands in config.xml");
+                return islands;
+            })
+            .catch(function (err) {
+                islandConfigPromise = null;
+                throw err;
+            });
+    }
+
+    return islandConfigPromise;
+}
+
 window.POP_ASSET_ROOT = ASSET_ROOT.href;
 
 const SCENE_FP_RESTART = "FlashpointIslandRestart",
@@ -982,7 +1185,12 @@ function getCharLazyLoadStatus() {
 function loadFPStart(extraMenuSrc, width, height, flashvars) {
     mountMenu(extraMenuSrc, width, 58, flashvars);
 
-    window.flashpointLoad = function () {
+    window.flashpointLoad = function (island, scene, path) {
+        if (island && scene) {
+            POSTToBase(scene, island, path || PATH_DEFAULT);
+            return;
+        }
+
         // PopUtils.loadScene reaches this through ExternalInterface, so mount on a fresh
         // task for the same reason as finalize: on a restart this replaces a live player
         // and would destroy it while Ruffle still has its core locked.
@@ -1226,12 +1434,47 @@ function dbug(message) {
     base.php submits a form here; a static host cannot answer a POST, so the same
     three arguments travel as a query string instead.
 */
+let roomTransition = 0;
+
+/*
+   The client calls POSTToBase for every room change. base.php used to submit a form
+   here, which reloaded the whole page and rebuilt Ruffle. Keep the page alive and
+   replace only the stage mount, so room transitions do not tear down the document.
+*/
 function POSTToBase(room, island, startup_path) {
-    const params = new URLSearchParams();
-    params.set("room", room);
-    params.set("island", island);
-    params.set("startup_path", startup_path);
-    location.href = PAGE_BASE + "?" + params.toString();
+    if (!room || !island) return;
+
+    const path = startup_path || PATH_DEFAULT,
+          query = new URLSearchParams(location.search),
+          transition = ++roomTransition;
+
+    query.delete("fresh");
+    query.set("room", room);
+    query.set("island", island);
+    query.set("startup_path", path);
+
+    try {
+        history.replaceState(null, "", location.pathname + "?" + query.toString() + location.hash);
+    } catch (err) { }
+
+    // ExternalInterface calls this while Ruffle is still executing ActionScript.
+    // Let that stack unwind before replacing the mount.
+    setTimeout(function () {
+        if (transition !== roomTransition) return;
+
+        if (typeof window.popSetIsland === "function") window.popSetIsland(island);
+
+        // Returning to Home is a menu state, not a game stage; drop the old stage
+        // before loadFPStart mounts the save-data toolbar.
+        if (room === SCENE_FP_START) {
+            const current = liveMount(game);
+            if (current) current.remove();
+            game = null;
+        }
+
+        errorText.hidden = true;
+        flashpointLoad(island, room, path);
+    }, 0);
 }
 
 // Debug helper: list what this browser has saved for the local accounts.
@@ -2155,13 +2398,442 @@ window.dbug = dbug;
 window.flashpointReady = window.flashpointReady || function (message) {
     if (message) console.log(message);
 };
-window.flashpointLoad = window.flashpointLoad || flashpointLoad;
+window.flashpointLoad = window.flashpointLoad || function (island, scene, path) {
+    if (island && scene) {
+        POSTToBase(scene, island, path);
+        return;
+    }
+
+    flashpointLoad(island, scene, path);
+};
 window.flashpointError = flashpointError;
 window.setInteractivity = window.setInteractivity || function () {};
 window.loadTrackingPixel = window.loadTrackingPixel || function () {};
 window.finalize = window.finalize || function () {};
 window.setAdStatus = window.setAdStatus || getAdStatus;
 window.setCharLazyLoadStatus = window.setCharLazyLoadStatus || getCharLazyLoadStatus;
+
+/*
+   The client has a Global island branch - gameplay.swf maps island "Global" to
+   scenes/Global/scene<room>.swf - but the island map never offers it. These eight
+   event scenes ship in the asset tree, so expose them as an explicit menu instead
+   of leaving them unreachable. The room travels in the query string, which is the
+   same transport the rest of the page already uses.
+*/
+(function globalEvents() {
+    const btn = document.getElementById("eventsBtn"),
+          panel = document.getElementById("eventsPanel"),
+          home = document.getElementById("eventsHome"),
+          close = document.getElementById("eventsClose");
+
+    if (!btn || !panel || !home || !close) return;
+
+    function setOpen(open) {
+        panel.hidden = !open;
+
+        if (open) {
+            try { panel.focus(); } catch (err) { }
+            return;
+        }
+
+        const gameEl = document.getElementById("game");
+        if (gameEl && typeof gameEl.focus === "function") {
+            try { gameEl.focus(); } catch (err) { }
+        }
+    }
+
+    panel.addEventListener("click", function (event) {
+        const target = event.target.closest("button[data-room]");
+        if (!target) return;
+
+        setOpen(false);
+        POSTToBase(target.getAttribute("data-room"), "Global", "gameplay");
+    });
+
+    btn.addEventListener("click", function () { setOpen(panel.hidden); });
+    close.addEventListener("click", function () { setOpen(false); });
+
+    home.addEventListener("click", function () {
+        const query = new URLSearchParams(location.search);
+        query.delete("island");
+        query.delete("room");
+        query.delete("startup_path");
+
+        location.assign(location.pathname + (query.toString() ? "?" + query.toString() : ""));
+    });
+
+    window.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && !panel.hidden) {
+            event.preventDefault();
+            event.stopPropagation();
+            setOpen(false);
+        }
+    });
+})();
+
+/*
+   The Flash client's own map popup depends on popups/maps/<island>.swf, which is
+   missing for some rooms and cannot render at all if the popup fails. This native
+   map reads the same framework/data/config.xml the client does, so every card
+   launches the configured entry scene (City2 for Early, Mainstreet for Shark,
+   Present for Time) rather than guessing "<Island>Main".
+*/
+(function islandMap() {
+    const btn = document.getElementById("mapBtn"),
+          backdrop = document.getElementById("mapBackdrop"),
+          panel = document.getElementById("mapPanel"),
+          grid = document.getElementById("mapGrid"),
+          home = document.getElementById("mapHome"),
+          events = document.getElementById("mapEvents"),
+          close = document.getElementById("mapClose");
+
+    if (!btn || !backdrop || !panel || !grid || !home || !events || !close) return;
+
+    let islands = null,
+        loading = false;
+
+    function setOpen(open) {
+        panel.hidden = !open;
+        backdrop.hidden = !open;
+
+        if (open) {
+            const eventPanel = document.getElementById("eventsPanel");
+            if (eventPanel) eventPanel.hidden = true;
+
+            load();
+            try { panel.focus(); } catch (err) { }
+            return;
+        }
+
+        const gameEl = document.getElementById("game");
+        if (gameEl && typeof gameEl.focus === "function") {
+            try { gameEl.focus(); } catch (err) { }
+        }
+    }
+
+    async function load() {
+        if (islands || loading) return;
+
+        loading = true;
+        grid.textContent = "";
+
+        const note = document.createElement("p");
+        note.className = "mapNote";
+        note.textContent = "Loading islands...";
+        grid.appendChild(note);
+
+        try {
+            islands = await loadIslandConfig();
+            render();
+        } catch (err) {
+            note.textContent = "The island list could not be loaded (" + (err.message || err) + ").";
+        } finally {
+            loading = false;
+        }
+    }
+
+    function render() {
+        const current = new URLSearchParams(location.search).get("island") || "Home";
+
+        grid.textContent = "";
+
+        islands.forEach(function (island) {
+            const card = document.createElement("button"),
+                  name = document.createElement("b"),
+                  cluster = document.createElement("span");
+
+            card.type = "button";
+            card.className = "mapCard" + (island.name === current ? " current" : "");
+            name.textContent = island.name;
+            cluster.textContent = island.cluster || island.main || "";
+
+            card.append(name, cluster);
+
+            if (!island.main) {
+                card.disabled = true;
+                card.title = island.name + " is not available in this mirror yet.";
+            } else {
+                card.title = "Play " + island.name + " (" + island.main + ")";
+                card.addEventListener("click", function () { go(island); });
+            }
+
+            grid.appendChild(card);
+        });
+
+        const realmsCard = document.createElement("button"),
+              realmsName = document.createElement("b"),
+              realmsNote = document.createElement("span");
+
+        realmsCard.type = "button";
+        realmsCard.className = "mapCard" + (current === "Demo" ? " current" : "");
+        realmsCard.title = "Play the single-player Realms land prototype";
+        realmsName.textContent = "Realms (prototype)";
+        realmsNote.textContent = "Demo · terraforming tools";
+        realmsCard.append(realmsName, realmsNote);
+        realmsCard.addEventListener("click", goRealms);
+        grid.appendChild(realmsCard);
+    }
+
+    function goRealms() {
+        setOpen(false);
+        POSTToBase("LandPrototypeAS2", "Demo", "gameplay");
+    }
+
+    function go(island) {
+        setOpen(false);
+        POSTToBase(island.main, island.name, "gameplay");
+    }
+
+    function goHome() {
+        const query = new URLSearchParams(location.search);
+        query.delete("island");
+        query.delete("room");
+        query.delete("startup_path");
+
+        location.assign(location.pathname + (query.toString() ? "?" + query.toString() : ""));
+    }
+
+    btn.addEventListener("click", function () { setOpen(panel.hidden); });
+    close.addEventListener("click", function () { setOpen(false); });
+    backdrop.addEventListener("click", function () { setOpen(false); });
+    home.addEventListener("click", goHome);
+
+    events.addEventListener("click", function () {
+        setOpen(false);
+
+        const eventPanel = document.getElementById("eventsPanel");
+        if (eventPanel) eventPanel.hidden = true;
+
+        const eventBtn = document.getElementById("eventsBtn");
+        if (eventBtn) eventBtn.click();
+    });
+
+    window.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && !panel.hidden) {
+            event.preventDefault();
+            event.stopPropagation();
+            setOpen(false);
+        }
+    });
+
+    window.popCloseMap = function () { setOpen(false); };
+})();
+
+/*
+   Classic Poptropica marks a finished island with its medallion item (1001 for
+   Early, 1013 for Skullduggery, ...). The AS2 client keeps the character save in
+   a local shared object, but inventory is stored behind cryptInv/XOR_KEY and a
+   fresh save has no inventory field at all, so this mirror cannot rely on it.
+   Read a readable inventory when one exists, and let the player mark the rest;
+   the marks live in this browser next to the game's own save.
+*/
+(function medallions() {
+    const btn = document.getElementById("medalsBtn"),
+          backdrop = document.getElementById("medalsBackdrop"),
+          panel = document.getElementById("medalsPanel"),
+          grid = document.getElementById("medalsGrid"),
+          summary = document.getElementById("medalsSummary"),
+          note = document.getElementById("medalsNote"),
+          refresh = document.getElementById("medalsRefresh"),
+          clear = document.getElementById("medalsClear"),
+          close = document.getElementById("medalsClose");
+
+    if (!btn || !backdrop || !panel || !grid || !summary || !note || !refresh || !clear || !close) return;
+
+    const MARKS_KEY = "pop.medals";
+
+    let medals = null,
+        loading = false;
+
+    function setOpen(open) {
+        panel.hidden = !open;
+        backdrop.hidden = !open;
+
+        if (open) {
+            const mapPanel = document.getElementById("mapPanel"),
+                  mapBackdrop = document.getElementById("mapBackdrop"),
+                  eventPanel = document.getElementById("eventsPanel");
+
+            if (mapPanel) mapPanel.hidden = true;
+            if (mapBackdrop) mapBackdrop.hidden = true;
+            if (eventPanel) eventPanel.hidden = true;
+
+            if (medals) render();
+            else load();
+
+            try { panel.focus(); } catch (err) { }
+            return;
+        }
+
+        const gameEl = document.getElementById("game");
+        if (gameEl && typeof gameEl.focus === "function") {
+            try { gameEl.focus(); } catch (err) { }
+        }
+    }
+
+    function readMarks() {
+        try {
+            const raw = JSON.parse(localStorage.getItem(MARKS_KEY) || "[]");
+
+            return new Set(Array.isArray(raw) ? raw.filter(function (name) {
+                return typeof name === "string" && name;
+            }) : []);
+        } catch (err) {
+            return new Set();
+        }
+    }
+
+    function writeMarks(marks) {
+        try {
+            localStorage.setItem(MARKS_KEY, JSON.stringify(Array.from(marks).sort()));
+        } catch (err) { }
+    }
+
+    function ownedFromState(state) {
+        const owned = new Set();
+
+        if (!state) return owned;
+
+        const raw = state.inventory !== undefined ? state.inventory
+                  : state.items !== undefined ? state.items
+                  : state.medallions;
+
+        function add(value) {
+            if (value === null || value === undefined) return;
+
+            const text = String(value).trim();
+            if (!text) return;
+
+            owned.add(text);
+
+            const digits = text.match(/\d+/g);
+            if (digits) digits.forEach(function (digit) { owned.add(digit); });
+        }
+
+        if (typeof raw === "string") {
+            raw.split(/[^0-9A-Za-z_]+/).forEach(add);
+        } else if (typeof raw === "number") {
+            add(raw);
+        } else if (Array.isArray(raw)) {
+            raw.forEach(function (value) {
+                if (value && typeof value === "object")
+                    Object.keys(value).forEach(function (key) { if (value[key]) add(key); });
+                else
+                    add(value);
+            });
+        } else if (raw && typeof raw === "object") {
+            Object.keys(raw).forEach(function (key) { if (raw[key]) add(key); });
+        }
+
+        return owned;
+    }
+
+    function hasMedal(owned, island) {
+        return owned.has(String(island.medallion)) ||
+               owned.has("medal" + island.name) ||
+               owned.has("medal" + island.name.toLowerCase());
+    }
+
+    async function load() {
+        if (loading) return;
+
+        loading = true;
+        grid.textContent = "";
+        note.textContent = "Reading this browser's save...";
+
+        try {
+            const islands = await loadIslandConfig();
+
+            medals = islands.filter(function (island) { return !!island.medallion; })
+                            .sort(function (a, b) { return Number(a.medallion) - Number(b.medallion); });
+
+            render();
+        } catch (err) {
+            note.textContent = "The medallion list could not be loaded (" + (err.message || err) + ").";
+        } finally {
+            loading = false;
+        }
+    }
+
+    function render() {
+        if (!medals) return;
+
+        const state = typeof window.popSaveState === "function" ? window.popSaveState() : null,
+              auto = ownedFromState(state),
+              marks = readMarks();
+        let count = 0, automatic = 0;
+
+        grid.textContent = "";
+
+        medals.forEach(function (island) {
+            const isAuto = hasMedal(auto, island),
+                  marked = marks.has(island.name),
+                  has = isAuto || marked,
+                  card = document.createElement("button"),
+                  name = document.createElement("b"),
+                  id = document.createElement("span");
+
+            if (isAuto) automatic++;
+            if (has) count++;
+
+            card.type = "button";
+            card.className = "medalCard" + (has ? " owned" : "");
+            card.setAttribute("aria-pressed", has ? "true" : "false");
+            card.title = isAuto ? "This medallion is in your save."
+                       : marked ? "Marked in this browser - click to unmark."
+                       : "Click to mark this medallion in this browser.";
+            name.textContent = island.name;
+            id.textContent = "Medallion " + island.medallion;
+
+            card.append(name, id);
+
+            card.addEventListener("click", function () {
+                if (isAuto) return;
+
+                const current = readMarks();
+
+                if (current.has(island.name)) current.delete(island.name);
+                else current.add(island.name);
+
+                writeMarks(current);
+                render();
+            });
+
+            grid.appendChild(card);
+        });
+
+        summary.textContent = count + " / " + medals.length + " collected";
+
+        if (!state)
+            note.textContent = "No character save yet. Marks are stored in this browser.";
+        else if (automatic)
+            note.textContent = automatic + " read from the save; click the others to mark them here.";
+        else
+            note.textContent = "The save has no readable medallion items; click a card to mark it here.";
+    }
+
+    btn.addEventListener("click", function () { setOpen(panel.hidden); });
+    close.addEventListener("click", function () { setOpen(false); });
+    backdrop.addEventListener("click", function () { setOpen(false); });
+
+    refresh.addEventListener("click", function () {
+        if (medals) render();
+        else load();
+    });
+
+    clear.addEventListener("click", function () {
+        writeMarks(new Set());
+        render();
+    });
+
+    window.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && !panel.hidden) {
+            event.preventDefault();
+            event.stopPropagation();
+            setOpen(false);
+        }
+    });
+})();
 
 /*
    Debug helper, off unless localStorage['pop.debugSO'] is "1". Ruffle keeps shared

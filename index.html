@@ -20,7 +20,7 @@
         #stage { position: absolute; transform-origin: 0 0; }
 
         #accountsBtn {
-            position: fixed; right: 10px; bottom: 10px; z-index: 10;
+            position: fixed; left: 10px; bottom: 118px; z-index: 10;
             font: 12px/1.4 system-ui, sans-serif; padding: 5px 9px;
             color: #fff; background: #0b6fd0; border: 1px solid #5fb4f5;
             border-radius: 4px; cursor: pointer;
@@ -28,7 +28,7 @@
         #accountsBtn:hover { background: #0a5aa8; }
 
         #fsBtn {
-            position: fixed; left: 10px; bottom: 10px; z-index: 10;
+            position: fixed; left: 10px; bottom: 46px; z-index: 10;
             font: 12px/1.4 system-ui, sans-serif; padding: 5px 9px;
             color: #fff; background: #0b6fd0; border: 1px solid #5fb4f5;
             border-radius: 4px; cursor: pointer;
@@ -36,7 +36,7 @@
         #fsBtn:hover { background: #0a5aa8; }
 
         #eventsBtn {
-            position: fixed; left: 10px; bottom: 46px; z-index: 10;
+            position: fixed; left: 10px; bottom: 154px; z-index: 10;
             font: 12px/1.4 system-ui, sans-serif; padding: 5px 9px;
             color: #fff; background: #0b6fd0; border: 1px solid #5fb4f5;
             border-radius: 4px; cursor: pointer;
@@ -44,7 +44,7 @@
         #eventsBtn:hover { background: #0a5aa8; }
 
         #eventsPanel {
-            position: fixed; left: 10px; bottom: 82px; z-index: 11;
+            position: fixed; left: 10px; bottom: 230px; z-index: 11;
             width: 250px; max-height: 60vh; overflow: auto;
             font: 12px/1.5 system-ui, sans-serif; color: #fff;
             background: #0a4f92; border: 1px solid #5fb4f5; border-radius: 6px;
@@ -64,7 +64,7 @@
         .eventsActions button { flex: 1; text-align: center !important; margin: 0; }
 
         #mapBtn {
-            position: fixed; left: 10px; top: 10px; z-index: 10;
+            position: fixed; left: 10px; bottom: 190px; z-index: 10;
             font: 12px/1.4 system-ui, sans-serif; padding: 5px 9px;
             color: #fff; background: #0b6fd0; border: 1px solid #5fb4f5;
             border-radius: 4px; cursor: pointer;
@@ -106,12 +106,20 @@
         .mapActions button:hover { background: #0a5aa8; }
 
         #medalsBtn {
-            position: fixed; right: 10px; top: 10px; z-index: 10;
+            position: fixed; left: 10px; bottom: 82px; z-index: 10;
             font: 12px/1.4 system-ui, sans-serif; padding: 5px 9px;
             color: #fff; background: #0b6fd0; border: 1px solid #5fb4f5;
             border-radius: 4px; cursor: pointer;
         }
         #medalsBtn:hover { background: #0a5aa8; }
+
+        #reportBugBtn {
+            position: fixed; left: 10px; bottom: 10px; z-index: 10;
+            font: 12px/1.4 system-ui, sans-serif; padding: 5px 9px;
+            color: #fff; background: #0b6fd0; border: 1px solid #5fb4f5;
+            border-radius: 4px; cursor: pointer; text-decoration: none;
+        }
+        #reportBugBtn:hover { background: #0a5aa8; }
 
         #medalsBackdrop {
             position: fixed; inset: 0; z-index: 12;
@@ -244,6 +252,10 @@
     </div>
 
     <button id="medalsBtn" type="button">Medallions</button>
+    <a id="reportBugBtn" href="https://forms.gle/CGJNQEny3v6GPJi56"
+       target="_blank" rel="noopener noreferrer"
+       title="Found a bug in Poptropica on x3e? Report it here"
+       aria-label="Found a bug in Poptropica on x3e? Report it here">Report a bug</a>
     <div id="medalsBackdrop" hidden></div>
     <div id="medalsPanel" role="dialog" aria-modal="true" aria-labelledby="medalsTitle" tabindex="-1" hidden>
         <h2 id="medalsTitle">Medallions<span id="medalsSummary">0 / 35 collected</span></h2>
@@ -1179,7 +1191,12 @@ function getCharLazyLoadStatus() {
 function loadFPStart(extraMenuSrc, width, height, flashvars) {
     mountMenu(extraMenuSrc, width, 58, flashvars);
 
-    window.flashpointLoad = function () {
+    window.flashpointLoad = function (island, scene, path) {
+        if (island && scene) {
+            POSTToBase(scene, island, path || PATH_DEFAULT);
+            return;
+        }
+
         // PopUtils.loadScene reaches this through ExternalInterface, so mount on a fresh
         // task for the same reason as finalize: on a restart this replaces a live player
         // and would destroy it while Ruffle still has its core locked.
@@ -1424,12 +1441,47 @@ function dbug(message) {
     base.php submits a form here; a static host cannot answer a POST, so the same
     three arguments travel as a query string instead.
 */
+let roomTransition = 0;
+
+/*
+   The client calls POSTToBase for every room change. base.php used to submit a form
+   here, which reloaded the whole page and rebuilt Ruffle. Keep the page alive and
+   replace only the stage mount, so room transitions do not tear down the document.
+*/
 function POSTToBase(room, island, startup_path) {
-    const params = new URLSearchParams();
-    params.set("room", room);
-    params.set("island", island);
-    params.set("startup_path", startup_path);
-    location.href = PAGE_BASE + "?" + params.toString();
+    if (!room || !island) return;
+
+    const path = startup_path || PATH_DEFAULT,
+          query = new URLSearchParams(location.search),
+          transition = ++roomTransition;
+
+    query.delete("fresh");
+    query.set("room", room);
+    query.set("island", island);
+    query.set("startup_path", path);
+
+    try {
+        history.replaceState(null, "", location.pathname + "?" + query.toString() + location.hash);
+    } catch (err) { }
+
+    // ExternalInterface calls this while Ruffle is still executing ActionScript.
+    // Let that stack unwind before replacing the mount.
+    setTimeout(function () {
+        if (transition !== roomTransition) return;
+
+        if (typeof window.popSetIsland === "function") window.popSetIsland(island);
+
+        // Returning to Home is a menu state, not a game stage; drop the old stage
+        // before loadFPStart mounts the save-data toolbar.
+        if (room === SCENE_FP_START) {
+            const current = liveMount(game);
+            if (current) current.remove();
+            game = null;
+        }
+
+        errorText.hidden = true;
+        flashpointLoad(island, room, path);
+    }, 0);
 }
 
 // Debug helper: list what this browser has saved for the local accounts.
@@ -2353,7 +2405,14 @@ window.dbug = dbug;
 window.flashpointReady = window.flashpointReady || function (message) {
     if (message) console.log(message);
 };
-window.flashpointLoad = window.flashpointLoad || flashpointLoad;
+window.flashpointLoad = window.flashpointLoad || function (island, scene, path) {
+    if (island && scene) {
+        POSTToBase(scene, island, path);
+        return;
+    }
+
+    flashpointLoad(island, scene, path);
+};
 window.flashpointError = flashpointError;
 window.setInteractivity = window.setInteractivity || function () {};
 window.loadTrackingPixel = window.loadTrackingPixel || function () {};
@@ -2394,12 +2453,8 @@ window.setCharLazyLoadStatus = window.setCharLazyLoadStatus || getCharLazyLoadSt
         const target = event.target.closest("button[data-room]");
         if (!target) return;
 
-        // Keep assetbase and any other page options, replace only the destination.
-        const query = new URLSearchParams(location.search);
-        query.set("island", "Global");
-        query.set("room", target.getAttribute("data-room"));
-
-        location.assign(location.pathname + "?" + query.toString());
+        setOpen(false);
+        POSTToBase(target.getAttribute("data-room"), "Global", "gameplay");
     });
 
     btn.addEventListener("click", function () { setOpen(panel.hidden); });
@@ -2527,20 +2582,13 @@ window.setCharLazyLoadStatus = window.setCharLazyLoadStatus || getCharLazyLoadSt
     }
 
     function goRealms() {
-        const query = new URLSearchParams(location.search);
-        query.set("island", "Demo");
-        query.set("room", "LandPrototypeAS2");
-        query.set("startup_path", "gameplay");
-
-        location.assign(PAGE_BASE + "?" + query.toString());
+        setOpen(false);
+        POSTToBase("LandPrototypeAS2", "Demo", "gameplay");
     }
 
     function go(island) {
-        const query = new URLSearchParams(location.search);
-        query.set("island", island.name);
-        query.set("room", island.main);
-
-        location.assign(location.pathname + "?" + query.toString());
+        setOpen(false);
+        POSTToBase(island.main, island.name, "gameplay");
     }
 
     function goHome() {
