@@ -20,6 +20,7 @@
    Run the same command again to continue. Switches:
        window.__popScenesChunk = 4            islands per run (default 2)
        window.__popScenesRooms = 25           rooms per run (default 40, 0 = no cap)
+       window.__popScenesParallel = 3         rooms probed at once (default 3, max 6)
        window.__popScenesIslands = ["Astro"]  only these, ignores saved progress
        window.__popScenesReset = true         forget saved progress
 
@@ -38,6 +39,7 @@
 (async () => {
   const CHUNK = 2;                    // islands per run
   const ROOM_CAP = 40;                // rooms per run; the biggest 2-island pair is 61
+  const PARALLEL = 3;                 // rooms in flight; one stalled room must not block the rest
   const PER_ROOM_TIMEOUT = 30000;     // give up waiting for the scene after this
   const RETRY_TIMEOUT = 30000;        // one clean retry for a row that saw nothing
   const POLL = 250;
@@ -116,6 +118,8 @@
 
   const capInput = parseInt(window.__popScenesRooms, 10);
   const roomCap = capInput === 0 ? 0 : (capInput > 0 ? capInput : ROOM_CAP);
+  const parallelInput = parseInt(window.__popScenesParallel, 10);
+  const parallel = Math.min(Math.max(parallelInput || PARALLEL, 1), 6);
 
   const pending = only
     ? islands.filter(function (island) { return only.indexOf(island) !== -1; })
@@ -156,7 +160,7 @@
     console.log("%cpop-scenes: " + queueRooms + " room(s) in " + queue.length + " island(s) · " +
                 progress.rows.length + "/" + totalRooms + " done before this run", "font-weight:bold");
     console.log("islands: " + queue.map(function (job) { return job.island + " (" + job.rooms.length + ")"; }).join(", "));
-    console.log("~10-15s per room; keep this tab focused");
+    console.log("~10-15s per room; probing " + parallel + " at a time; keep this tab focused");
   }
 
   async function probe(island, room, timeoutMs) {
@@ -224,61 +228,72 @@
   const rows = [];
   let doneHere = 0;
 
-  for (const job of queue) {
-    const island = job.island;
+  const work = [];
 
-    for (const room of job.rooms) {
-      let r = await probe(island, room, PER_ROOM_TIMEOUT);
-      let retried = false;
+  queue.forEach(function (job) {
+    job.rooms.forEach(function (room) { work.push({ island: job.island, room: room }); });
+  });
 
-      // A background-throttled iframe never requests anything; one clean retry tells
-      // that apart from a genuine stall.
-      if (!r.scene && !r.failed.length) {
-        retried = true;
-        console.log("  " + island + "/" + room + ": nothing after " + (PER_ROOM_TIMEOUT / 1000) + "s, retrying once");
+  async function runOne(job) {
+    const island = job.island,
+          room = job.room;
 
-        const again = await probe(island, room, RETRY_TIMEOUT);
-        r = { scene: again.scene, status: again.status, failed: again.failed, reqs: again.reqs,
-              recent: again.recent, ms: r.ms + again.ms, expected: r.expected };
-      }
+    let r = await probe(island, room, PER_ROOM_TIMEOUT);
+    let retried = false;
 
-      const row = {
-        island: island,
-        room: room,
-        expected: r.expected,
-        ms: r.ms,
-        scene: r.scene,
-        status: r.status,
-        failed: r.failed,
-        reqs: r.reqs
-      };
+    // A background-throttled iframe never requests anything; one clean retry tells
+    // that apart from a genuine stall.
+    if (!r.scene && !r.failed.length) {
+      retried = true;
+      console.log("  " + island + "/" + room + ": nothing after " + (PER_ROOM_TIMEOUT / 1000) + "s, retrying once");
 
-      if (r.scene !== r.expected || r.failed.length) row.recent = r.recent;   // diagnosis only where it matters
-      if (retried) row.retried = true;
-
-      rows.push(row);
-      doneHere++;
-
-      if (!only) {
-        progress.rows.push(row);
-        try { localStorage.setItem(KEY, JSON.stringify(progress)); } catch (err) {}
-      }
-
-      const verdict = row.failed.length ? "FAIL"
-                    : !row.scene ? "NO SCENE"
-                    : row.scene !== row.expected ? "WRONG"
-                    : "ok";
-
-      console.log(
-        "[" + doneHere + "/" + queueRooms + "] " + island.padEnd(15) + room.padEnd(22) +
-        (row.scene || "NONE").padEnd(28) + String(row.ms).padStart(6) + "ms  " + verdict
-      );
-
-      if (verdict !== "ok" && row.recent) console.log("      saw: " + row.recent.join(", "));
+      const again = await probe(island, room, RETRY_TIMEOUT);
+      r = { scene: again.scene, status: again.status, failed: again.failed, reqs: again.reqs,
+            recent: again.recent, ms: r.ms + again.ms, expected: r.expected };
     }
 
-    console.log("  " + island + ": " + job.rooms.length + " room(s) probed");
+    const row = {
+      island: island,
+      room: room,
+      expected: r.expected,
+      ms: r.ms,
+      scene: r.scene,
+      status: r.status,
+      failed: r.failed,
+      reqs: r.reqs
+    };
+
+    if (r.scene !== r.expected || r.failed.length) row.recent = r.recent;   // diagnosis only where it matters
+    if (retried) row.retried = true;
+
+    rows.push(row);
+    doneHere++;
+
+    if (!only) {
+      progress.rows.push(row);
+      try { localStorage.setItem(KEY, JSON.stringify(progress)); } catch (err) {}
+    }
+
+    const verdict = row.failed.length ? "FAIL"
+                  : !row.scene ? "NO SCENE"
+                  : row.scene !== row.expected ? "WRONG"
+                  : "ok";
+
+    console.log(
+      "[" + doneHere + "/" + queueRooms + "] " + island.padEnd(15) + room.padEnd(22) +
+      (row.scene || "NONE").padEnd(28) + String(row.ms).padStart(6) + "ms  " + verdict
+    );
+
+    if (verdict !== "ok" && row.recent) console.log("      saw: " + row.recent.join(", "));
   }
+
+  async function worker() {
+    while (work.length) {
+      await runOne(work.shift());
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(parallel, work.length) }, worker));
 
   const allRows = only ? rows : progress.rows;
   const seen = new Set(allRows.map(function (r) { return r.island + "/" + r.room; }));

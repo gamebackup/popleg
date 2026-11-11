@@ -24,10 +24,11 @@
     console tool uses, so this resumes wherever a previous run stopped. A lock stops
     a second tab from running the same sweep at the same time.
 
-    One chunk is one iframe at a time. Increase CHUNK only after watching memory.
+    One chunk is CHUNK rooms, probed up to CHUNK at a time. Three Ruffle instances
+    at once is the default speed/memory trade-off; lower it if the tab gets heavy.
 */
 (async () => {
-    const CHUNK = 1;
+    const CHUNK = 3;
     const MAX_RUNS = 1000;
     const KEY = "pop-scenes:/";
     const LOCK = "pop-scenes-lock";
@@ -97,9 +98,10 @@
 
     window.__popScenesChunk = 2;
     window.__popScenesRooms = CHUNK;
+    window.__popScenesParallel = CHUNK;
 
     say("run " + runs + " · " + before.length + " rooms already saved · probing " +
-        CHUNK + " more, one at a time");
+        CHUNK + " more, " + CHUNK + " at a time");
 
     let result;
 
