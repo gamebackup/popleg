@@ -21,6 +21,8 @@
        window.__popScenesChunk = 4            islands per run (default 2)
        window.__popScenesRooms = 25           rooms per run (default 40, 0 = no cap)
        window.__popScenesParallel = 3         rooms probed at once (default 3, max 6)
+       window.__popScenesRoomList = [...]     only these "Island/Room" entries, saved progress
+       window.__popScenesKey = "..."           override the progress storage key
        window.__popScenesIslands = ["Astro"]  only these, ignores saved progress
        window.__popScenesReset = true         forget saved progress
 
@@ -47,11 +49,21 @@
   const GAP = 600;                    // and a breath between rooms
 
   const base = location.pathname.replace(/[^/]*$/, "");   // game folder, with trailing slash
-  const KEY = "pop-scenes:" + base;
+  const KEY = window.__popScenesKey || ("pop-scenes:" + base);
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const startedAt = performance.now();
 
   const only = Array.isArray(window.__popScenesIslands) ? window.__popScenesIslands.slice() : null;
+
+  const rawRoomList = Array.isArray(window.__popScenesRoomList) ? window.__popScenesRoomList.slice() : null;
+  const roomList = rawRoomList
+    ? rawRoomList.map(String).filter(function (key) {
+        const room = key.split("/").pop() || "";
+        return /^[^/]+\/[^/]+$/.test(key) && !/^(AdGround|AdSky|AdUnder)/i.test(room);
+      })
+    : null;
+  const target = roomList ? new Set(roomList) : null;
+
   if (window.__popScenesReset) {
     window.__popScenesReset = false;
     try { localStorage.removeItem(KEY); } catch (err) {}
@@ -70,6 +82,12 @@
     progress.rows = progress.rows.filter(function (row) {
       return row && !/^AdGround/i.test(String(row.room || ""));
     });
+
+    if (target) {
+      progress.rows = progress.rows.filter(function (row) {
+        return target.has(row.island + "/" + row.room);
+      });
+    }
   }
 
   /*
@@ -112,7 +130,11 @@
     return;
   }
 
-  const totalRooms = islands.reduce(function (n, island) { return n + byIsland[island].length; }, 0);
+  const totalRooms = islands.reduce(function (n, island) {
+    return n + byIsland[island].filter(function (room) {
+      return !target || target.has(island + "/" + room);
+    }).length;
+  }, 0);
   const done = new Set(progress.rows.map(function (r) { return r.island + "/" + r.room; }));
   const chunk = Math.min(Math.max(parseInt(window.__popScenesChunk, 10) || CHUNK, 1), islands.length);
 
@@ -124,7 +146,10 @@
   const pending = only
     ? islands.filter(function (island) { return only.indexOf(island) !== -1; })
     : islands.filter(function (island) {
-          return byIsland[island].some(function (room) { return !done.has(island + "/" + room); });
+          return byIsland[island].some(function (room) {
+            const key = island + "/" + room;
+            return !done.has(key) && (!target || target.has(key));
+          });
       });
 
   // Build the run: at most `chunk` islands and `roomCap` rooms, skipping anything a
@@ -139,7 +164,10 @@
     for (const island of pending) {
       if (queue.length >= chunk || budget <= 0) break;
 
-      const rooms = byIsland[island].filter(function (room) { return !done.has(island + "/" + room); });
+      const rooms = byIsland[island].filter(function (room) {
+        const key = island + "/" + room;
+        return !done.has(key) && (!target || target.has(key));
+      });
       if (!rooms.length) continue;
 
       const take = budget === Infinity ? rooms : rooms.slice(0, budget);
@@ -299,10 +327,14 @@
   const seen = new Set(allRows.map(function (r) { return r.island + "/" + r.room; }));
   const remaining = [];
 
-  islands.forEach(function (island) {
-    const left = byIsland[island].filter(function (room) { return !seen.has(island + "/" + room); }).length;
-    if (left) remaining.push(island + " (" + left + ")");
-  });
+  if (target) {
+    target.forEach(function (key) { if (!seen.has(key)) remaining.push(key); });
+  } else {
+    islands.forEach(function (island) {
+      const left = byIsland[island].filter(function (room) { return !seen.has(island + "/" + room); }).length;
+      if (left) remaining.push(island + " (" + left + ")");
+    });
+  }
 
   const runMs = performance.now() - startedAt;
 
@@ -312,7 +344,7 @@
 
     console.log("%cchunk done · " + allRows.length + "/" + totalRooms + " rooms checked · this run " +
                 (runMs / 1000).toFixed(1) + "s", "font-weight:bold");
-    console.log("islands left: " + remaining.join(", "));
+    console.log(target ? "rooms left: " + remaining.length : "islands left: " + remaining.join(", "));
     console.log("run the same command again to continue; progress is saved in this browser");
     console.log("to start over: window.__popScenesReset = true");
     return;
