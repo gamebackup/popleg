@@ -168,7 +168,8 @@
         #accountsList li { display: flex; align-items: center; gap: 6px; padding: 4px 0; border-bottom: 1px solid rgba(255, 255, 255, .15); }
         #accountsList b { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         #accountsList i { font-style: normal; font-size: 11px; opacity: .75; }
-        .accountsActions { display: flex; gap: 6px; margin: 8px 0; }
+        .accountsActions { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+        .accountsActions button { flex: 1 1 calc(50% - 3px); }
         #accountsNote { margin: 0 0 8px; font-size: 11px; color: #d6ecff; }
         #accountsNote.bad { color: #ffd9a8; }
         #accountsList button, #accountsClose, .accountsActions button {
@@ -183,6 +184,41 @@
             max-height: 150px; overflow: auto; border-top: 1px solid rgba(255, 255, 255, .15);
         }
         #accountsChar div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        #storePanel {
+            position: fixed; right: 10px; bottom: 46px; z-index: 9;
+            width: 300px; max-height: 60vh; overflow: auto;
+            font: 12px/1.5 system-ui, sans-serif; color: #fff;
+            background: #0a4f92; border: 1px solid #5fb4f5; border-radius: 6px;
+            padding: 10px 12px; box-shadow: 0 6px 24px rgba(0, 0, 0, .45);
+        }
+        #storePanel h2 { margin: 0 0 8px; font-size: 13px; font-weight: 600; }
+        #storePanel h2 span { display: block; font-size: 11px; font-weight: 400; opacity: .75; }
+        #storeCredits { margin: 0 0 8px; font-weight: 600; color: #ffd166; }
+        #storeList { display: grid; gap: 6px; margin: 8px 0; }
+        .storeItem {
+            display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto;
+            gap: 0 8px; align-items: center; padding: 6px 8px;
+            background: #0a3d73; border: 1px solid #2b6fae; border-radius: 4px;
+        }
+        .storeItem b { grid-column: 1; font-size: 12px; }
+        .storeItem span { grid-column: 1; font-size: 11px; opacity: .75; }
+        .storeItem button {
+            grid-column: 2; grid-row: 1 / span 2; align-self: center;
+            font: inherit; color: #fff; background: #0b6fd0;
+            border: 1px solid #5fb4f5; border-radius: 3px; padding: 2px 7px; cursor: pointer;
+        }
+        .storeItem button:hover:not(:disabled) { background: #0a5aa8; }
+        .storeItem button:disabled { opacity: .6; cursor: default; }
+        .storeItem.owned { opacity: .8; border-color: #ffd166; }
+        #storeNote { margin: 8px 0; font-size: 11px; color: #d6ecff; }
+        #storeNote.bad { color: #ffd9a8; }
+        .storeActions { display: flex; gap: 6px; }
+        .storeActions button {
+            flex: 1; font: inherit; color: #fff; background: #0b6fd0;
+            border: 1px solid #5fb4f5; border-radius: 3px; padding: 3px 7px; cursor: pointer;
+        }
+        .storeActions button:hover { background: #0a5aa8; }
 
         #errorText {
             position: absolute;
@@ -277,10 +313,22 @@
             <button id="accountsExport" type="button">Export</button>
             <button id="accountsImport" type="button">Import</button>
             <button id="accountsLook" type="button">Change look</button>
+            <button id="accountsStore" type="button">Local store</button>
         </div>
         <input id="accountsFile" type="file" accept="application/json,.json" hidden>
         <div id="accountsNote"></div>
         <button id="accountsClose" type="button">Close</button>
+    </div>
+
+    <div id="storePanel" tabindex="-1" hidden>
+        <h2>Local store<span>credits and purchases stay in this browser</span></h2>
+        <div id="storeCredits">No account selected</div>
+        <div id="storeList"></div>
+        <p id="storeNote">Local bookkeeping only; this does not add items to the Flash inventory.</p>
+        <div class="storeActions">
+            <button id="storeRefresh" type="button">Refresh</button>
+            <button id="storeClose" type="button">Close</button>
+        </div>
     </div>
     <script>
 /*
@@ -481,7 +529,8 @@ const errorText = document.getElementById("errorText"),
         "__pop_import_accounts.php": 1,
         "__pop_delete_account.php": 1,
         "__pop_set_char.php": 1,
-        "__pop_set_membership.php": 1
+        "__pop_set_membership.php": 1,
+        "__pop_store.php": 1
     };
 
     function answer(body) {
@@ -803,6 +852,7 @@ const errorText = document.getElementById("errorText"),
                 } else {
                     let target = rebase(url.pathname) || url.pathname;
                     if (/\/gameplay\.swf$/.test(target)) target += "?v=20261112-15";
+                    if (/\/pop_stats\.swf$/.test(target)) target += "?v=20261112-6";
                     target = repairScene(target) || target;
 
                     // Keep the query: those island links carry ?island=...&room=...
@@ -846,6 +896,7 @@ const errorText = document.getElementById("errorText"),
                     } else if (!/\.php$/i.test(abs.pathname)) {
                         let target = rebase(abs.pathname) || abs.pathname;
                         if (/\/gameplay\.swf$/.test(target)) target += "?v=20261112-15";
+                        if (/\/pop_stats\.swf$/.test(target)) target += "?v=20261112-6";
                         target = repairScene(target) || target;
 
                         if (target !== abs.pathname) args[1] = target + abs.search;   // keep ?island=...&room=...
@@ -913,7 +964,16 @@ const errorText = document.getElementById("errorText"),
 // this browser's IndexedDB, so accounts work on a static host. Scoped to this
 // folder, so it never touches anything else on the origin.
 if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js", { scope: "./" }).then(function (reg) {
+    navigator.serviceWorker.register("sw.js?v=20261112-2", { scope: "./" }).then(function (reg) {
+        // The mirror can be opened in a profile that already has an older worker.
+        // Check once per tab rather than on every room navigation and reload.
+        try {
+            if (sessionStorage.getItem("pop.swUpdateChecked") !== "1") {
+                sessionStorage.setItem("pop.swUpdateChecked", "1");
+                reg.update().catch(function () { });
+            }
+        } catch (err) { }
+
         console.log("[pop] local account backend ready for", reg.scope);
 
         // A page is not controlled until the worker activates, so a load that registers
@@ -2080,6 +2140,7 @@ window.popAccounts = function () {
 
     window.popBuildLso = buildLso;
     window.popRefreshPanel = refresh;
+    window.popCurrentAccount = activeAccount;
 
     window.popSaveState = charState;
 
@@ -2100,7 +2161,10 @@ window.popAccounts = function () {
 
         name.textContent = account.username +
                            (activeAccount() === account.username ? " \u00b7 playing" : "");
+        const bought = Array.isArray(account.purchases) ? account.purchases.length : 0;
+
         info.textContent = (account.credits || "0") + "c \u00b7 " +
+                           (bought ? bought + (bought === 1 ? " item \u00b7 " : " items \u00b7 ") : "") +
                            (account.member === false ? "free" : "member");
 
         play.type = "button";
@@ -2431,6 +2495,11 @@ window.popAccounts = function () {
     function setOpen(open) {
         panel.hidden = !open;
 
+        if (open) {
+            const store = document.getElementById("storePanel");
+            if (store) store.hidden = true;
+        }
+
         try { localStorage.setItem(PANEL_KEY, open ? "1" : "0"); } catch (err) { }
 
         if (open) {
@@ -2477,6 +2546,192 @@ window.popAccounts = function () {
     try {
         if (localStorage.getItem(PANEL_KEY) === "1") setOpen(true);
     } catch (err) { }
+})();
+
+
+/* Local store: credits and purchases live on the same local account record as the
+   character, so they survive reloads and account export/import. Opening it hides
+   the Accounts panel; closing it returns focus to the game stage. */
+(function localStore() {
+    const openBtn = document.getElementById("accountsStore"),
+          panel = document.getElementById("storePanel"),
+          credits = document.getElementById("storeCredits"),
+          list = document.getElementById("storeList"),
+          note = document.getElementById("storeNote"),
+          refreshBtn = document.getElementById("storeRefresh"),
+          closeBtn = document.getElementById("storeClose");
+
+    if (!openBtn || !panel || !credits || !list || !note || !refreshBtn || !closeBtn) return;
+
+    let busy = false;
+
+    function setNote(text, bad) {
+        note.textContent = text || "";
+        note.classList.toggle("bad", !!bad);
+    }
+
+    function currentAccount() {
+        const active = typeof window.popCurrentAccount === "function" ? window.popCurrentAccount() : "";
+        if (active) return active;
+
+        if (typeof window.popSaveState === "function") {
+            const state = window.popSaveState();
+            if (state && state.login) return String(state.login).trim().toLowerCase();
+        }
+
+        return "";
+    }
+
+    function focusGame() {
+        const gameEl = document.getElementById("game");
+        if (gameEl && typeof gameEl.focus === "function") {
+            try { gameEl.focus(); } catch (err) { }
+        }
+    }
+
+    function setOpen(open) {
+        panel.hidden = !open;
+
+        if (open) {
+            const accounts = document.getElementById("accountsPanel");
+            if (accounts) {
+                accounts.hidden = true;
+                try { localStorage.setItem("pop.accountsPanel", "0"); } catch (err) { }
+            }
+
+            setNote("");
+            load();
+            try { panel.focus(); } catch (err) { }
+            return;
+        }
+
+        focusGame();
+    }
+
+    function render(data) {
+        credits.textContent = String(data.credits || 0) + " credits";
+
+        list.textContent = "";
+        const owned = new Set(Array.isArray(data.purchases) ? data.purchases : []);
+
+        (data.items || []).forEach(function (item) {
+            const row = document.createElement("div"),
+                  name = document.createElement("b"),
+                  cost = document.createElement("span"),
+                  buy = document.createElement("button");
+
+            row.className = "storeItem";
+            name.textContent = item.name;
+            cost.textContent = item.cost + " credits";
+            buy.type = "button";
+
+            if (owned.has(item.id)) {
+                row.classList.add("owned");
+                buy.textContent = "Owned";
+                buy.disabled = true;
+            } else {
+                buy.textContent = "Buy";
+                buy.addEventListener("click", function () { buyItem(item, buy); });
+            }
+
+            row.append(name, cost, buy);
+            list.appendChild(row);
+        });
+    }
+
+    async function load() {
+        const username = currentAccount();
+
+        if (!username) {
+            credits.textContent = "No local account selected.";
+            list.textContent = "";
+            setNote("Play the game once to create a local account, then open the store again.", true);
+            return;
+        }
+
+        setNote("Loading...");
+        try {
+            const res = await fetch("__pop_store.php?username=" + encodeURIComponent(username), { cache: "no-store" }),
+                  data = await res.json();
+
+            if (!data.ok) {
+                setNote(data.error === "noaccount"
+                    ? "No local account is saved under that name yet."
+                    : "The local store is unavailable right now.", true);
+                return;
+            }
+
+            render(data);
+            setNote("Credits and purchases are stored in this browser only.");
+        } catch (err) {
+            setNote("The local store is starting; press Refresh in a moment.", true);
+        }
+    }
+
+    async function buyItem(item, button) {
+        const username = currentAccount();
+
+        if (busy || !username) return;
+
+        busy = true;
+        button.disabled = true;
+
+        try {
+            const res = await fetch("__pop_store.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({
+                    username: username,
+                    action: "buy",
+                    item: item.id
+                }).toString()
+            });
+            const data = await res.json();
+
+            if (!data.ok) {
+                setNote(data.error === "credits" ? "Not enough credits."
+                    : data.error === "owned" ? "That item is already owned."
+                    : "The purchase did not go through.", true);
+                await load();
+                return;
+            }
+
+            render(data);
+            setNote("Purchased " + (data.bought ? data.bought.name : item.name) + ".");
+
+            if (typeof window.popRefreshPanel === "function") window.popRefreshPanel();
+        } catch (err) {
+            setNote("The purchase could not be saved locally.", true);
+        } finally {
+            busy = false;
+        }
+    }
+
+    openBtn.addEventListener("click", function () { setOpen(true); });
+    closeBtn.addEventListener("click", function () { setOpen(false); });
+    refreshBtn.addEventListener("click", function () { load(); });
+
+    window.addEventListener("keydown", function (event) {
+        const altS = event.altKey && !event.ctrlKey && !event.metaKey &&
+                     (event.key === "s" || event.key === "S" || event.code === "KeyS");
+
+        if (altS) {
+            event.preventDefault();
+            event.stopPropagation();
+            setOpen(true);
+            return;
+        }
+
+        if (event.key === "Escape" && !panel.hidden) {
+            event.preventDefault();
+            event.stopPropagation();
+            setOpen(false);
+        }
+    });
+
+    window.addEventListener("pop-sw-ready", function () {
+        if (!panel.hidden) load();
+    });
 })();
 
 window.dbug = dbug;

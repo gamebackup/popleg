@@ -88,6 +88,19 @@ function newDbId() {
     return String(Date.now()) + String(Math.floor(Math.random() * 1000));
 }
 
+/*
+   A small local catalog. These are bookkeeping items for the mirror, not real
+   client inventory: buying one deducts local credits and records the id on the
+   account, so the purchase survives reloads and account export/import.
+*/
+const STORE_ITEMS = [
+    { id: "wave-emote", name: "Wave emote", cost: 10 },
+    { id: "pirate-hat", name: "Pirate hat", cost: 20 },
+    { id: "striped-shirt", name: "Striped shirt", cost: 30 },
+    { id: "puppy-companion", name: "Puppy companion", cost: 45 },
+    { id: "tiki-hut", name: "Tiki hut", cost: 60 }
+];
+
 /* -------------------------------- endpoints -------------------------------- */
 
 const ENDPOINTS = {
@@ -231,6 +244,7 @@ const ENDPOINTS = {
                 pass_hash: rec.pass_hash || "",
                 dbid: rec.dbid || newDbId(),
                 credits: rec.credits || "75",
+                purchases: Array.isArray(rec.purchases) ? rec.purchases : [],
                 member: rec.member !== false,
                 gender: rec.gender || "M",
                 age: rec.age || "",
@@ -276,6 +290,49 @@ const ENDPOINTS = {
         await putAccount(rec);
 
         return jsonResponse({ ok: 1, username: username });
+    },
+
+    /*
+       Local store: credits and purchases live on the same IndexedDB account
+       record as the character. This deliberately does not call the old Store
+       endpoints, which have no server behind them in a static mirror.
+    */
+    async "__pop_store.php"(p) {
+        const username = (p.username || "").trim().toLowerCase();
+        const rec = username ? await getAccount(username) : null;
+
+        if (!rec)
+            return jsonResponse({ ok: 0, error: "noaccount", items: STORE_ITEMS });
+
+        const purchases = Array.isArray(rec.purchases)
+            ? rec.purchases.filter(function (id) { return typeof id === "string"; })
+            : [];
+        const credits = Math.max(0, Math.floor(Number(rec.credits) || 0));
+
+        if ((p.action || "list") === "buy") {
+            const item = STORE_ITEMS.find(function (entry) { return entry.id === p.item; });
+
+            if (!item)
+                return jsonResponse({ ok: 0, error: "item" });
+            if (purchases.indexOf(item.id) !== -1)
+                return jsonResponse({ ok: 0, error: "owned" });
+            if (credits < item.cost)
+                return jsonResponse({ ok: 0, error: "credits", credits: String(credits) });
+
+            rec.credits = String(credits - item.cost);
+            rec.purchases = purchases.concat(item.id);
+            await putAccount(rec);
+
+            return jsonResponse({
+                ok: 1,
+                credits: rec.credits,
+                purchases: rec.purchases,
+                items: STORE_ITEMS,
+                bought: item
+            });
+        }
+
+        return jsonResponse({ ok: 1, credits: String(credits), purchases: purchases, items: STORE_ITEMS });
     },
 
     /* Local-only test switch: make one account a member or a free account. */
