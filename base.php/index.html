@@ -802,7 +802,7 @@ const errorText = document.getElementById("errorText"),
                         return answer(phpBody(url.pathname));
                 } else {
                     let target = rebase(url.pathname) || url.pathname;
-                    if (/\/gameplay\.swf$/.test(target)) target += "?v=20261112-13";
+                    if (/\/gameplay\.swf$/.test(target)) target += "?v=20261112-15";
                     target = repairScene(target) || target;
 
                     // Keep the query: those island links carry ?island=...&room=...
@@ -845,7 +845,7 @@ const errorText = document.getElementById("errorText"),
                         args[1] = abs.href;
                     } else if (!/\.php$/i.test(abs.pathname)) {
                         let target = rebase(abs.pathname) || abs.pathname;
-                        if (/\/gameplay\.swf$/.test(target)) target += "?v=20261112-13";
+                        if (/\/gameplay\.swf$/.test(target)) target += "?v=20261112-15";
                         target = repairScene(target) || target;
 
                         if (target !== abs.pathname) args[1] = target + abs.search;   // keep ?island=...&room=...
