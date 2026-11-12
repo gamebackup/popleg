@@ -11,7 +11,7 @@
         window.RufflePlayer = window.RufflePlayer || {};
         window.RufflePlayer.config = { quality: "low", base: new URL(".", location.href).href };
     </script>
-    <script src="ruffle/ruffle.js"></script>
+    <script src="ruffle/ruffle.js?v=20261112-1"></script>
     <style>
         body, embed, ruffle-player, ruffle-embed { background-color: #139ffd; }
         body { margin: 0; width: 100vw; height: 100vh; overflow: hidden; }
@@ -202,7 +202,7 @@
     </style>
 </head>
 <body>
-    <div id="errorText" hidden>Multiplayer features are unavailable.</div>
+    <div id="errorText" hidden>Local common room: other players and chat are simulated; online multiplayer is unavailable.</div>
 
     <button id="accountsBtn" type="button">Accounts</button>
     <button id="fsBtn" type="button">Fullscreen</button>
@@ -802,6 +802,7 @@ const errorText = document.getElementById("errorText"),
                         return answer(phpBody(url.pathname));
                 } else {
                     let target = rebase(url.pathname) || url.pathname;
+                    if (/\/gameplay\.swf$/.test(target)) target += "?v=20261112-13";
                     target = repairScene(target) || target;
 
                     // Keep the query: those island links carry ?island=...&room=...
@@ -844,6 +845,7 @@ const errorText = document.getElementById("errorText"),
                         args[1] = abs.href;
                     } else if (!/\.php$/i.test(abs.pathname)) {
                         let target = rebase(abs.pathname) || abs.pathname;
+                        if (/\/gameplay\.swf$/.test(target)) target += "?v=20261112-13";
                         target = repairScene(target) || target;
 
                         if (target !== abs.pathname) args[1] = target + abs.search;   // keep ?island=...&room=...
@@ -1170,9 +1172,9 @@ function flashpointLoad(island, scene, path = PATH_DEFAULT) {
                 pageState = STATE_SCENE;
 
                 // Common rooms are multiplayer places; this mirror answers their
-                // endpoints but has no other players. Wimpy Boardwalk Island also has
-                // a normal scene named "Arcade", which is not a common room.
-                if (!isCommonScene(scene) && !(scene === "Arcade" && island === "Early"))
+                // endpoints but has no other players. Early Poptropica's Arcade is a
+                // common room; Wimpy Boardwalk's scene of the same name is not.
+                if (!isCommonScene(scene, island))
                     break;
 
                 errorText.hidden = false;
@@ -1448,9 +1450,10 @@ const COMMON_SCENES = [ "Coconut", "Party", "Cinema", "News", "HairClub", "Airli
                         "Saltys", "Crop", "BaguetteInn", "Billiards", "MidasGym",
                         "BrokenBarrel", "HotelInterior", "ClubInterior" ];
 
-function isCommonScene(scene) {
+function isCommonScene(scene, island) {
     return scene === SCENE_FP_START || scene.endsWith("Common") ||
-           COMMON_SCENES.indexOf(scene) !== -1;
+           COMMON_SCENES.indexOf(scene) !== -1 ||
+           (scene === "Arcade" && island === "Early");
 }
 
 function resumeScene(lastScene) {
@@ -1463,7 +1466,7 @@ function resumeScene(lastScene) {
         return fresh;
 
     // Early Poptropica's entry scene is City2; every other island uses "<Island>Main".
-    if (!lastScene.scene || isCommonScene(lastScene.scene))
+    if (!lastScene.scene || isCommonScene(lastScene.scene, lastScene.island))
         return { island: lastScene.island,
                  scene: lastScene.island === "Early" ? "City2" : lastScene.island + "Main" };
 
@@ -1492,6 +1495,36 @@ function dbug(message) {
 let roomTransition = 0;
 
 /*
+   The client can call POSTToBase several times in quick succession while a room
+   loads. Chrome throttles the History API after a burst of replaceState calls, so
+   collapse rapid URL updates into one trailing write.
+*/
+let historyTimer = 0;
+let pendingHistoryURL = "";
+
+function rememberRoomInURL(url) {
+    pendingHistoryURL = url;
+
+    if (historyTimer) return;
+
+    historyTimer = setTimeout(function () {
+        historyTimer = 0;
+
+        const next = pendingHistoryURL;
+        pendingHistoryURL = "";
+
+        if (!next) return;
+
+        const current = location.pathname + location.search + location.hash;
+        if (next === current) return;
+
+        try {
+            history.replaceState(null, "", next);
+        } catch (err) { }
+    }, 300);
+}
+
+/*
    The client calls POSTToBase for every room change. base.php used to submit a form
    here, which reloaded the whole page and rebuilt Ruffle. Keep the page alive and ask
    the existing Ruffle player to load the next movie, so room transitions do not tear
@@ -1509,9 +1542,7 @@ function POSTToBase(room, island, startup_path) {
     query.set("island", island);
     query.set("startup_path", path);
 
-    try {
-        history.replaceState(null, "", location.pathname + "?" + query.toString() + location.hash);
-    } catch (err) { }
+    rememberRoomInURL(location.pathname + "?" + query.toString() + location.hash);
 
     // ExternalInterface calls this while Ruffle is still executing ActionScript.
     // Let that stack unwind before replacing the mount.
