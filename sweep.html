@@ -20,10 +20,11 @@
     whole Ruffle instance, and the browser does not give all of that memory back
     promptly; reloading keeps a long sweep from exhausting the tab.
 
-    Open /sweep.html?run=1 for a full pass, or /sweep.html?retry=1&run=1 to
-    recheck only the noScene rows from the last finished summary. Progress is the
-    same localStorage entry the console tool uses, so this resumes wherever a
-    previous run stopped. A lock stops a second tab from running the same sweep.
+    Open /sweep.html?run=1 for a full pass, /sweep.html?retry=1&run=1 to recheck
+    the last full sweep's noScene rows, or /sweep.html?retry=2&run=1 to recheck
+    the noScene rows left by retry 1. Progress is the same localStorage entry the
+    console tool uses, so this resumes wherever a previous run stopped. A lock
+    stops a second tab from running the same sweep.
 
     One chunk is CHUNK rooms, probed up to CHUNK at a time. Three Ruffle instances
     at once is the default speed/memory trade-off; lower it if the tab gets heavy.
@@ -32,11 +33,13 @@
     const CHUNK = 3;
     const MAX_RUNS = 1000;
     const params = new URLSearchParams(location.search);
-    const retry = params.get("retry") === "1";
-    const KEY = retry ? "pop-scenes-retry:/" : "pop-scenes:/";
-    const LOCK = retry ? "pop-scenes-retry-lock" : "pop-scenes-lock";
-    const RUNS = retry ? "pop-scenes-retry-runs" : "pop-scenes-runs";
-    const SUMMARY = retry ? "pop-scenes-retry-summary" : "pop-scenes-summary";
+    const retryPass = parseInt(params.get("retry"), 10) || 0;
+    const retry = retryPass > 0;
+    const retrySuffix = retryPass > 1 ? "retry" + retryPass : "retry";
+    const KEY = retry ? "pop-scenes-" + retrySuffix + ":/" : "pop-scenes:/";
+    const LOCK = retry ? "pop-scenes-" + retrySuffix + "-lock" : "pop-scenes-lock";
+    const RUNS = retry ? "pop-scenes-" + retrySuffix + "-runs" : "pop-scenes-runs";
+    const SUMMARY = retry ? "pop-scenes-" + retrySuffix + "-summary" : "pop-scenes-summary";
     const status = document.getElementById("status");
     const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -57,11 +60,15 @@
     let retryRooms = null;
 
     if (retry) {
+        const sourceSummary = retryPass === 1 ? "pop-scenes-summary"
+                            : retryPass === 2 ? "pop-scenes-retry-summary"
+                            : "pop-scenes-retry" + (retryPass - 1) + "-summary";
+
         let original = null;
-        try { original = JSON.parse(localStorage.getItem("pop-scenes-summary") || "null"); } catch (err) { }
+        try { original = JSON.parse(localStorage.getItem(sourceSummary) || "null"); } catch (err) { }
 
         if (!original || !Array.isArray(original.noScene)) {
-            say("Retry needs a finished sweep summary. Run the full sweep first.");
+            say("Retry " + retryPass + " needs " + sourceSummary + " with a noScene list.");
             return;
         }
 
@@ -71,7 +78,7 @@
         });
 
         if (!retryRooms.length) {
-            say("No unverified rooms to retry.");
+            say("No unverified rooms left for retry " + retryPass + ".");
             return;
         }
 
@@ -81,7 +88,7 @@
 
     const done = localStorage.getItem(SUMMARY);
     if (done) {
-        say((retry ? "Retry already finished." : "Sweep already finished.") + "\n\n" + done);
+        say((retry ? "Retry " + retryPass + " already finished." : "Sweep already finished.") + "\n\n" + done);
         return;
     }
 
@@ -127,7 +134,7 @@
     window.__popScenesRooms = CHUNK;
     window.__popScenesParallel = CHUNK;
 
-    say((retry ? "retry " : "run ") + runs + " · " + before.length +
+    say((retry ? "retry " + retryPass : "run") + " " + runs + " · " + before.length +
         (retry ? "/" + retryRooms.length : " rooms already saved") +
         " · probing " + CHUNK + " more, " + CHUNK + " at a time");
 
@@ -150,7 +157,7 @@
     if (result && result.rooms) {
         localStorage.setItem(SUMMARY, JSON.stringify(result, null, 1));
         try { localStorage.removeItem(RUNS); } catch (err) { }
-        say((retry ? "Retry finished: " : "Finished: ") + result.rooms + " rooms · ok " + result.ok +
+        say((retry ? "Retry " + retryPass + " finished: " : "Finished: ") + result.rooms + " rooms · ok " + result.ok +
             " · failed " + result.failed.length + " · no scene " + result.noScene.length +
             " · wrong scene " + result.wrong.length + "\n\n" + JSON.stringify(result, null, 1));
         return;

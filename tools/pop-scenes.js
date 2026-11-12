@@ -53,6 +53,23 @@
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const startedAt = performance.now();
 
+  // A hidden tab throttles timers and iframes, which is what turns a live room into
+  // a false NO SCENE. Wait for the tab to be visible instead of burning the timeout.
+  async function waitVisible() {
+    if (document.visibilityState === "visible") return;
+
+    await new Promise(function (resolve) {
+      const check = function () {
+        if (document.visibilityState === "visible") {
+          document.removeEventListener("visibilitychange", check);
+          resolve();
+        }
+      };
+
+      document.addEventListener("visibilitychange", check);
+    });
+  }
+
   const only = Array.isArray(window.__popScenesIslands) ? window.__popScenesIslands.slice() : null;
 
   const rawRoomList = Array.isArray(window.__popScenesRoomList) ? window.__popScenesRoomList.slice() : null;
@@ -266,6 +283,8 @@
     const island = job.island,
           room = job.room;
 
+    await waitVisible();
+
     let r = await probe(island, room, PER_ROOM_TIMEOUT);
     let retried = false;
 
@@ -275,6 +294,7 @@
       retried = true;
       console.log("  " + island + "/" + room + ": nothing after " + (PER_ROOM_TIMEOUT / 1000) + "s, retrying once");
 
+      await waitVisible();
       const again = await probe(island, room, RETRY_TIMEOUT);
       r = { scene: again.scene, status: again.status, failed: again.failed, reqs: again.reqs,
             recent: again.recent, ms: r.ms + again.ms, expected: r.expected };
