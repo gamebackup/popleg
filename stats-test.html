@@ -1,0 +1,22 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>pop_stats test</title>
+<script src="ruffle/ruffle.js"></script>
+<style>html,body{margin:0;background:#222}embed{display:block}</style>
+<script>
+  window.RufflePlayer = window.RufflePlayer || {};
+  window.RufflePlayer.config = { autoplay: "on", unmuteOverlay: "hidden", letterbox: "on" };
+  const which = new URLSearchParams(location.search).get("which");
+  const src = which === "orig"
+    ? "assets/flashpoint/originalFiles/pop_stats.swf"
+    : which === "patched" ? "assets/pop_stats_patched.swf" : "assets/pop_stats.swf";
+  document.addEventListener("DOMContentLoaded", () => {
+    const el = document.createElement("embed");
+    el.setAttribute("type", "application/x-shockwave-flash");
+    el.setAttribute("src", src);
+    el.setAttribute("width", "1010");
+    el.setAttribute("height", "645");
+    document.body.appendChild(el);
+    console.log("[test] loading", src);
+  });
+</script>
